@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeryLivraison Admin — Connexion</title>
+<link rel="icon" href="/static/truck.svg" type="image/svg+xml">
+<style>
+  :root{--navy:#0b1a2e;--amber:#f59e0b;--red:#e5484d;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(800px 480px at 85% -10%,rgba(245,158,11,.16),transparent 60%),
+               linear-gradient(155deg,#050d19 0%,#0b1a2e 55%,#10233c 100%);color:#16233a}
+  .card{background:#fff;border-radius:22px;box-shadow:0 24px 60px rgba(0,0,0,.45);width:100%;max-width:400px;padding:38px 34px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--amber),#e07b00)}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+  .brand .logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,var(--amber),#e07b00);display:flex;align-items:center;justify-content:center;color:#fff}
+  .brand b{font-size:20px;font-weight:800;color:#fff}
+  .brand span{display:block;font-size:11.5px;color:#8fa3c2;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+  h1{font-size:21px;font-weight:800;color:#0b1a2e;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+  .sub{color:#5c6b82;font-size:13.5px;margin-bottom:24px}
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+  .field label{font-size:13px;font-weight:700;color:#0b1a2e}
+  .field input{border:1.5px solid #e3e9f2;border-radius:11px;padding:13px 15px;font-size:15px;outline:none;font-family:inherit;transition:border-color .15s}
+  .field input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+  .err{display:none;background:#fdebec;border:1px solid #f5c2c4;color:var(--red);font-size:13.5px;font-weight:600;border-radius:10px;padding:11px 14px;margin-bottom:16px}
+  .err.show{display:block}
+  .btn{width:100%;background:linear-gradient(135deg,var(--amber),#e07b00);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 20px rgba(245,158,11,.35)}
+  .btn:hover{box-shadow:0 10px 26px rgba(245,158,11,.5)}
+  .lock{font-size:11.5px;color:#8fa3c2;text-align:center;margin-top:18px;display:flex;align-items:center;justify-content:center;gap:6px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+      </div>
+      <div><b>TeryLivraison</b><span>Administration</span></div>
+    </div>
+    <h1>
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      Espace administrateur
+    </h1>
+    <p class="sub">Accès réservé — connectez-vous avec un compte administrateur pour gérer les réservations.</p>
+    {% if error %}<div class="err show">{{ error }}</div>{% endif %}
+    <form method="post" action="/login" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="admin@kargo.com" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button class="btn" type="submit">Se connecter</button>
+    </form>
+    <div class="lock" style="display:flex;align-items:center;gap:8px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Zone privée — administrateurs uniquement</div>
+  </div>
+</body>
+</html>

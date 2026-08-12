@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réservation — TeryLivraison</title>
+<link rel="icon" href="/static/truck.svg" type="image/svg+xml">
+<style>
+  :root{
+    --navy:#0b1a2e; --navy-2:#10233c; --navy-3:#16304f; --navy-4:#1d3a60;
+    --amber:#f59e0b; --amber-h:#fbbf24; --amber-soft:#fdf3e0;
+    --bg:#f4f6fa; --card:#ffffff; --text:#16233a; --muted:#5c6b82;
+    --line:#e3e9f2; --green:#0ea371; --red:#e5484d;
+    --radius:16px; --shadow:0 10px 30px rgba(12,26,46,.10);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.55}
+  img,svg{display:block}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit}
+
+  /* ---------- Page head ---------- */
+  .page-head{background:radial-gradient(700px 320px at 88% -20%,rgba(245,158,11,.25),transparent 60%),linear-gradient(152deg,#0b1a2e,#16304f);color:#fff;padding:44px 20px}
+  .page-head-inner{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .page-head h1{font-size:28px;font-weight:800;letter-spacing:-.4px}
+  .page-head p{color:#b9c8dd;font-size:14.5px;margin-top:6px}
+
+  /* ---------- Form ---------- */
+  .form-card{background:var(--card);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:38px;max-width:900px;margin:44px auto;width:100%}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field.full{grid-column:1/-1}
+  .field label{font-size:13.5px;font-weight:700;color:var(--navy)}
+  .field label .req{color:var(--red)}
+  .field label .hint{color:var(--muted);font-weight:600;font-size:12.5px}
+  .field input,.field select,.field textarea{border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;font-size:14.5px;color:var(--text);background:#fbfcfe;transition:border-color .15s,box-shadow .15s;width:100%;outline:none}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16);background:#fff}
+  .form-section-title{grid-column:1/-1;font-size:16px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:10px;margin-top:10px;padding-bottom:4px;border-bottom:2px solid var(--amber-soft)}
+  .form-section-title .n{width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  .chips{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{position:relative}
+  .chip input{position:absolute;opacity:0;pointer-events:none}
+  .chip span{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:#fbfcfe;border-radius:999px;padding:10px 20px;font-size:14px;font-weight:600;color:var(--muted);transition:all .15s;cursor:pointer}
+  .chip input:checked + span{border-color:var(--amber);background:var(--amber-soft);color:#92400e;font-weight:800}
+
+  .weight-warn{display:none;grid-column:1/-1;background:#fdebec;border:1px solid #f5c2c4;color:var(--red);font-size:13.5px;font-weight:600;border-radius:10px;padding:11px 14px}
+  .weight-warn.show{display:block}
+
+  .note{grid-column:1/-1;background:var(--amber-soft);border:1px solid #f3d9a8;border-radius:12px;padding:14px 16px;font-size:14px;color:#7c4a03;display:flex;gap:11px;align-items:flex-start}
+  .note svg{flex-shrink:0;margin-top:2px}
+  .note.driver{display:none}
+  .note.driver.show{display:flex}
+  .note.blue{background:#eef4fc;border-color:#c9dcf2;color:#1d3a60}
+
+  .dist-result{display:none;grid-column:1/-1;background:#e6f7f0;border:1px solid #b5e6d2;border-radius:14px;padding:18px 20px;color:#0a6b4a;flex-direction:column;gap:14px}
+  .dist-result.show{display:flex}
+  .dist-result.err{background:#fdebec;border-color:#f5c2c4;color:#e5484d}
+  .dr-route{display:flex;align-items:center;gap:12px}
+  .dr-point{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+  .dr-point .dr-ic{width:32px;height:32px;border-radius:9px;background:#fff;border:1px solid #b5e6d2;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .dr-point .dr-addr{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dr-path{position:relative;flex:0 0 64px;height:2px;background:repeating-linear-gradient(90deg,#7fd0ae 0 6px,transparent 6px 11px)}
+  .dr-truck{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:1px solid #b5e6d2;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:#0a6b4a}
+  .dr-metrics{display:flex;gap:32px}
+  .dr-metric{display:flex;flex-direction:column}
+  .dr-metric b{font-size:24px;font-weight:800;line-height:1.1}
+  .dr-metric small{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#57a98a}
+  .dist-result.err .dr-metric small{color:#e08990}
+  .dr-track{position:relative;height:10px;border-radius:999px;background:#cdeeda}
+  .dr-fill{position:absolute;inset:0 auto 0 0;width:0%;border-radius:999px;background:linear-gradient(90deg,#0ea371,#f59e0b);transition:width .6s ease}
+  .dr-mark{position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #f59e0b;display:flex;align-items:center;justify-content:center;color:#b45309;transition:left .6s ease;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .dist-spin{display:none;grid-column:1/-1;justify-content:center;align-items:center;gap:10px;color:var(--muted);font-size:14px;padding:6px 0}
+  .dist-spin.show{display:flex}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .dist-spin .sp{width:18px;height:18px;border:2.5px solid var(--line);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite}
+
+  .agree{grid-column:1/-1;display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text);cursor:pointer}
+  .agree input{width:18px;height:18px;margin-top:2px;accent-color:var(--amber);flex-shrink:0}
+
+  .total-box{grid-column:1/-1;background:var(--navy);color:#fff;border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:6px}
+  .total-box .t-label{font-size:13px;color:#93a5c0}
+  .total-box .t-val{font-size:30px;font-weight:800;color:var(--amber-h)}
+  .btn-submit{background:linear-gradient(135deg,var(--amber),#e07b00);color:#fff;border:none;border-radius:12px;padding:15px 34px;font-size:16px;font-weight:800;box-shadow:0 8px 20px rgba(245,158,11,.35)}
+  .btn-submit:hover{box-shadow:0 10px 26px rgba(245,158,11,.5)}
+  .btn-submit:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}
+  .form-error{grid-column:1/-1;display:none;background:#fdebec;border:1px solid #f5c2c4;color:var(--red);font-size:14px;font-weight:600;border-radius:10px;padding:12px 14px}
+  .form-error.show{display:block}
+
+  /* ---------- Véhicules (mini grille) ---------- */
+  .veh-pick{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:4px}
+  .vp-card{border:1.5px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:all .15s;background:#fbfcfe}
+  .vp-card:hover{border-color:#c9d6e8}
+  .vp-card.selected{border-color:var(--amber);background:var(--amber-soft);box-shadow:0 0 0 3px rgba(245,158,11,.15)}
+  .vp-card.disabled{opacity:.55;cursor:not-allowed}
+  .vp-card img{width:100%;height:92px;object-fit:cover;border-radius:10px}
+  .vp-name{font-size:14.5px;font-weight:800;color:var(--navy);display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .vp-badge{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .vp-badge.ok{background:#e6f7f0;color:var(--green)}
+  .vp-badge.no{background:#fdebec;color:var(--red)}
+  .vp-price{font-size:15px;font-weight:800;color:#b45309}
+  .vp-price small{font-size:11.5px;color:var(--muted);font-weight:600}
+  .vp-cap{font-size:12px;color:var(--muted)}
+  .vp-back{font-size:11.5px;font-weight:700;color:#b45309;display:flex;align-items:center;gap:6px}
+
+  /* ---------- Success ---------- */
+  .success{display:none;max-width:640px;margin:44px auto;background:var(--card);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:44px;text-align:center}
+  .success.show{display:block}
+  .success .check{width:72px;height:72px;border-radius:50%;background:#e6f7f0;color:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+  .success h2{font-size:26px;font-weight:800;margin-bottom:8px}
+  .success .sub{color:var(--muted);margin-bottom:26px}
+  .succ-recap{text-align:left;background:var(--bg);border-radius:14px;padding:18px 22px;margin-bottom:26px;font-size:14.5px}
+  .succ-recap .sr{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .succ-recap .sr:last-child{border-bottom:none}
+  .succ-recap .sr span{color:var(--muted)}
+  .succ-recap .sr b{color:var(--navy)}
+  .succ-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .succ-phone{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border:none;border-radius:12px;padding:15px 26px;font-size:15px;font-weight:800;text-decoration:none}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--navy);color:#93a5c0;margin-top:40px}
+  .foot-bottom{border-top:1px solid rgba(255,255,255,.1);text-align:center;padding:18px;font-size:13px}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:900px){
+    .form-card{padding:28px 22px}
+  }
+  @media (max-width:700px){
+    .form-grid{grid-template-columns:1fr}
+    .veh-pick{grid-template-columns:1fr}
+    section{padding:56px 18px}
+  }
+  @media (max-width:480px){
+    .form-card{padding:24px 16px;border-radius:14px;margin:28px auto}
+    .page-head{padding:34px 16px}
+    .total-box{flex-direction:column;align-items:stretch;text-align:center;gap:14px}
+    .btn-submit{width:100%}
+    .chips{gap:8px}
+    .chip span{padding:9px 14px;font-size:13px}
+    .field input,.field select{padding:11px 12px}
+    .success{padding:30px 20px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+{% include '_sidebar.html' %}
+
+<div class="app-main">
+
+<!-- ================= HEAD ================= -->
+<div class="page-head">
+  <div class="page-head-inner">
+    <div>
+      <h1>Réserver un véhicule</h1>
+      <p>Choisissez votre véhicule, votre durée et vos adresses. Le total s'affiche en direct.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FORM ================= -->
+<div class="form-card">
+  <form id="bookingForm" class="form-grid" onsubmit="return submitBooking(event)">
+
+    <div class="form-section-title"><span class="n">1</span> Le véhicule</div>
+    <div class="veh-pick" id="vehPick"><!-- cartes injectées par JS --></div>
+    <div class="field full">
+      <select id="vehicle_id" name="vehicle_id" required onchange="onVehicleChange()" style="display:none"></select>
+      <span class="hint" id="vehHint" style="font-size:12px;color:var(--muted)">Les véhicules déjà pris pour vos dates sont grisés.</span>
+    </div>
+    <div class="field">
+      <label for="start_date">Date de début <span class="req">*</span></label>
+      <input type="date" id="start_date" name="start_date" required>
+    </div>
+    <div class="field">
+      <label for="end_date">Date de fin <span class="req">*</span></label>
+      <input type="date" id="end_date" name="end_date" required>
+    </div>
+    <div class="field full">
+      <label>Durée de location <span class="req">*</span></label>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="duration" value="2h" checked onchange="updateTotal();applyDurationLock()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></svg>2 heures — <b id="dur2hLabel">70 $</b></span></label>
+        <label class="chip"><input type="radio" name="duration" value="journee" onchange="updateTotal();applyDurationLock()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Journée complète — <b id="durJourLabel">140 $/jour</b></span></label>
+      </div>
+      <span class="hint" id="durHint" style="font-size:12px;color:var(--muted);margin-top:8px"></span>
+    </div>
+    <div class="field">
+      <label for="pickup_date">Date de récupération du véhicule <span class="req">*</span></label>
+      <input type="date" id="pickup_date" name="pickup_date">
+    </div>
+    <div class="field">
+      <label for="pickup_time">Heure de récupération <span class="req">*</span> <span class="hint">(pour prévenir l'équipe)</span></label>
+      <input type="time" id="pickup_time" name="pickup_time">
+    </div>
+
+    <div class="form-section-title"><span class="n">2</span> Identité &amp; permis</div>
+    <div class="field">
+      <label for="full_name">Nom complet <span class="req">*</span></label>
+      <input type="text" id="full_name" name="full_name" placeholder="Ex : Jean Tremblay" required>
+    </div>
+    <div class="field">
+      <label for="phone">Téléphone <span class="req">*</span></label>
+      <input type="tel" id="phone" name="phone" placeholder="Ex : +1 514 555 1234" required>
+    </div>
+    <div class="field">
+      <label for="email">Email <span class="hint">(optionnel)</span></label>
+      <input type="email" id="email" name="email" placeholder="vous@exemple.com">
+    </div>
+    <div class="field">
+      <label for="license_number">Numéro de permis de conduire <span class="req">*</span></label>
+      <input type="text" id="license_number" name="license_number" placeholder="Ex : Q 1234 5678 90" required>
+    </div>
+
+    <div class="form-section-title"><span class="n">3</span> Le colis (chargement)</div>
+    <div class="field">
+      <label>Type de colis <span class="req">*</span></label>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="cage_type" value="Meubles" required onchange="onCageTypeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2M20 18v2"/></svg>Meubles</span></label>
+        <label class="chip"><input type="radio" name="cage_type" value="Électros" onchange="onCageTypeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/></svg>Électros</span></label>
+        <label class="chip"><input type="radio" name="cage_type" value="Autre" onchange="onCageTypeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Autre</span></label>
+      </div>
+    </div>
+    <div class="field full" id="cageOtherWrap" style="display:none">
+      <label for="cage_detail">Précisez le contenu de votre colis <span class="req">*</span></label>
+      <input type="text" id="cage_detail" name="cage_detail" placeholder="Ex : cartons de vêtements, matériel de chantier…">
+    </div>
+    <div class="field">
+      <label for="weight_kg">Poids du colis (kg) <span class="req">*</span></label>
+      <input type="number" id="weight_kg" name="weight_kg" min="0" step="1" placeholder="Ex : 800" required oninput="checkWeight()">
+    </div>
+
+    <div class="form-section-title"><span class="n">4</span> Livraison &amp; distance (GPS)</div>
+    <div class="field">
+      <label for="pickup_address">Adresse de départ — où vous êtes <span class="req">*</span></label>
+      <input type="text" id="pickup_address" name="pickup_address" placeholder="Ex : 1234 Rue Sainte-Catherine, Montréal" required>
+    </div>
+    <div class="field">
+      <label for="destination">Destination — où déposer <span class="req">*</span></label>
+      <input type="text" id="destination" name="destination" placeholder="Ex : 5678 Boulevard des Galeries, Laval" required>
+    </div>
+    <div class="field full" style="flex-direction:row;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="hint" style="font-size:12.5px;color:var(--muted)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> La distance se calcule automatiquement dès que vos deux adresses sont remplies.</span>
+    </div>
+    <div class="dist-spin" id="distSpin"><span class="sp"></span> Calcul en cours…</div>
+    <div class="dist-result" id="distResult">
+      <div class="dr-route">
+        <div class="dr-point">
+          <span class="dr-ic">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <span class="dr-addr" id="distFrom">Adresse de départ</span>
+        </div>
+        <div class="dr-path">
+          <span class="dr-truck">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+          </span>
+        </div>
+        <div class="dr-point">
+          <span class="dr-ic">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>
+          </span>
+          <span class="dr-addr" id="distTo">Destination</span>
+        </div>
+      </div>
+      <div class="dr-metrics">
+        <div class="dr-metric"><b id="distKm">— km</b><small>Distance</small></div>
+        <div class="dr-metric"><b id="distTime">—</b><small>Temps de route</small></div>
+      </div>
+      <div class="dr-track">
+        <span class="dr-fill" id="drFill"></span>
+        <span class="dr-mark" id="drMark">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+        </span>
+      </div>
+      <input type="hidden" id="distance_km" name="distance_km" value="0">
+    </div>
+
+    <div class="form-section-title"><span class="n">5</span> Chauffeur ou main d'œuvre</div>
+    <div class="field full">
+      <label>Comment récupérez-vous le véhicule ? <span class="req">*</span></label>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="rental_mode" value="self" checked onchange="onModeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H8.5c-.7 0-1.3.3-1.8.7L4.5 10s-2.7.6-4.5 1.1c-.8.2-1.5 1-1.5 1.9v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>Je viens chercher le véhicule moi-même</span></label>
+        <label class="chip"><input type="radio" name="rental_mode" value="driver" onchange="onModeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>Chauffeur / main d'œuvre <b style="color:#b45309">(frais additionnels)</b></span></label>
+      </div>
+    </div>
+    <div class="note driver" id="driverNote">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+      <span><b>Chauffeur / main d'œuvre : frais additionnels.</b> Le prix se discute par téléphone avec notre équipe au <b>{{ company_phone }}</b> — appelez-nous pour en parler.</span>
+    </div>
+
+    <div class="form-section-title"><span class="n">6</span> Paiement</div>
+    <div class="field full">
+      <label>Méthode de paiement <span class="req">*</span> <span class="hint">(paiement sur place)</span></label>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="payment_method" value="credit_card" required><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Carte de crédit</span></label>
+        <label class="chip"><input type="radio" name="payment_method" value="transfer"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M3 8l9-5 9 5"/></svg>Virement bancaire</span></label>
+        <label class="chip"><input type="radio" name="payment_method" value="cash" checked><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>Espèces</span></label>
+      </div>
+    </div>
+    <div class="note blue">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <span><b>Paiement sur place :</b> carte de crédit, virement bancaire ou espèces. Après la réservation, appelez-nous au <b>{{ company_phone }}</b> pour confirmer.</span>
+    </div>
+
+    <div class="weight-warn" id="weightWarn"></div>
+
+    <label class="agree">
+      <input type="checkbox" id="fuel_agree" required>
+      <span>Je m'engage à rendre le véhicule avec <b>le même niveau de carburant</b> que celui indiqué au départ.</span>
+    </label>
+    <label class="agree">
+      <input type="checkbox" id="accident_agree" required>
+      <span>Je comprends qu'<b>en cas d'accident, c'est moi (le client) qui suis responsable des réparations</b>.</span>
+    </label>
+
+    <div class="form-error" id="formError"></div>
+
+    <div class="total-box">
+      <div>
+        <div class="t-label" id="totalLabel">Sélectionnez un véhicule et des dates</div>
+        <div class="t-val" id="totalVal">—</div>
+      </div>
+      <button type="submit" class="btn-submit" id="submitBtn" disabled>Réserver maintenant</button>
+    </div>
+  </form>
+
+  <!-- Success -->
+  <div class="success" id="successView">
+    <div class="check">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>Réservation confirmée !</h2>
+    <p class="sub">Notre équipe vous appelle pour confirmer. Appelez-nous directement au besoin.</p>
+    <div class="succ-recap" id="succRecap"></div>
+    <div class="succ-actions">
+      <a class="succ-phone" href="tel:{{ company_phone_tel }}">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+        {{ company_phone }}
+      </a>
+      <button class="btn btn-amber" onclick="resetBooking()">Nouvelle réservation</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="foot-bottom">© 2026 TeryLivraison — Location de véhicules de livraison · Québec</div>
+</footer>
+
+</div><!-- /app-main -->
+
+<!-- ================= WIDGETS ================= -->
+{% include '_widgets.html' %}
+
+<script>
+/* ================= State ================= */
+var vehicles = [];
+var selectedVehicleId = null;
+
+function todayStr(offset){
+  var d = new Date();
+  d.setDate(d.getDate() + (offset||0));
+  return d.toISOString().slice(0,10);
+}
+
+/* ================= Vehicles ================= */
+function loadVehicles(){
+  var start = document.getElementById('start_date').value || todayStr(0);
+  var end = document.getElementById('end_date').value || todayStr(1);
+  if(end < start){ end = start; }
+  fetch('/api/vehicles?start='+start+'&end='+end)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      vehicles = data.vehicles;
+      renderPick();
+      renderSelect();
+      onVehicleChange();
+    })
+    .catch(function(){ showError('Impossible de charger les véhicules. Réessayez.'); });
+}
+
+function priceStr(p){ return p.toFixed(2).replace(/\.00$/,''); }
+
+function renderPick(){
+  var grid = document.getElementById('vehPick');
+  var html = '';
+  vehicles.forEach(function(v){
+    var fb = v.type === 'camion' ? '/static/truck.svg' : '/static/van.svg';
+    var badge = v.available
+      ? '<span class="vp-badge ok">Dispo</span>'
+      : '<span class="vp-badge no">Déjà pris</span>';
+    var back = v.available
+      ? ''
+      : '<div class="vp-back">'+ic('clock')+' Sera dispo le '+(v.next_available||'?')+'</div>';
+    html +=
+      '<div class="vp-card'+(v.id===selectedVehicleId?' selected':'')+(v.available?'':' disabled')+'" '+
+        (v.available?'onclick="pickVehicle('+v.id+')"':'')+'>'+
+        '<img src="'+esc(v.image||fb)+'" alt="" onerror="this.onerror=null;this.src=\''+fb+'\'">'+
+        '<div class="vp-name">'+esc(v.name)+badge+'</div>'+
+        '<div class="vp-price">' + v.price_2h + ' $ <small>/ 2 h · ' + v.price_day + ' $/jour</small></div>' +
+        '<div class="vp-cap">'+ic('scale')+' '+v.capacity_kg+' kg · '+ic('fuel')+' même carburant</div>'+
+        back+
+      '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+function renderSelect(){
+  var sel = document.getElementById('vehicle_id');
+  var html = '<option value="" disabled selected>Sélectionnez un véhicule…</option>';
+  vehicles.forEach(function(v){
+    var label = v.name+' ('+v.capacity_kg+' kg)';
+    html += '<option value="'+v.id+'"'+(v.available?'':' disabled')+'>'+esc(label)+(v.available?'':' (pris)')+'</option>';
+  });
+  sel.innerHTML = html;
+  if(selectedVehicleId){ sel.value = selectedVehicleId; }
+}
+
+function pickVehicle(id){
+  selectedVehicleId = id;
+  document.getElementById('vehicle_id').value = id;
+  onVehicleChange();
+  renderPick();
+}
+
+function onVehicleChange(){
+  var sel = document.getElementById('vehicle_id');
+  var id = parseInt(sel.value,10);
+  selectedVehicleId = id || null;
+  renderPick();
+  var v = getSelectedVehicle();
+  var submitBtn = document.getElementById('submitBtn');
+  if(!v){
+    setTotal('—','Sélectionnez un véhicule et des dates');
+    submitBtn.disabled = true;
+    return;
+  }
+  if(!v.available){
+    setTotal('—','Ce véhicule est déjà pris pour ces dates');
+    submitBtn.disabled = true;
+    return;
+  }
+  document.getElementById('vehHint').textContent = 'Capacité du '+v.name+' : '+v.capacity_kg+' kg maximum.';
+  checkWeight();
+  updateTotal();
+}
+
+function checkWeight(){
+  var w = parseFloat(document.getElementById('weight_kg').value);
+  var v = getSelectedVehicle();
+  var warn = document.getElementById('weightWarn');
+  var btn = document.getElementById('submitBtn');
+  if(v && !isNaN(w) && w > v.capacity_kg){
+    warn.textContent = 'Le poids ('+w+' kg) dépasse la capacité du '+v.name+' ('+v.capacity_kg+' kg). Choisissez un véhicule plus grand ou réduisez le chargement.';
+    warn.classList.add('show');
+    btn.disabled = true;
+  } else {
+    warn.classList.remove('show');
+    if(v && v.available){ btn.disabled = false; }
+    updateTotal();
+  }
+}
+
+function getSelectedVehicle(){
+  for(var i=0;i<vehicles.length;i++){ if(vehicles[i].id===selectedVehicleId){ return vehicles[i]; } }
+  return null;
+}
+
+/* ================= Total (prix par type de véhicule) ================= */
+function getDuration(){
+  var sel = document.querySelector('input[name="duration"]:checked');
+  return sel ? sel.value : '2h';
+}
+
+function updateTotal(){
+  var v = getSelectedVehicle();
+  var start = document.getElementById('start_date').value;
+  var end = document.getElementById('end_date').value;
+  if(!v){ return; }
+  document.getElementById('dur2hLabel').textContent = v.price_2h + ' $';
+  document.getElementById('durJourLabel').textContent = v.price_day + ' $/jour';
+  if(!start || !end){ return; }
+  var s = new Date(start), e = new Date(end);
+  if(e < s){ e = s; }
+  var days = Math.round((e - s)/86400000) + 1;
+  var dur = getDuration();
+  if(dur === 'journee'){
+    var total = v.price_day * days;
+    setTotal(priceStr(total) + ' $', days + ' jour' + (days>1?'s':'') + ' × ' + v.price_day + ' $/jour');
+  } else {
+    setTotal(priceStr(v.price_2h) + ' $', '2 heures de location');
+  }
+}
+
+function setTotal(val, label){
+  document.getElementById('totalVal').textContent = val;
+  document.getElementById('totalLabel').textContent = label;
+}
+
+/* ================= Durée : 2 h = une seule journée / journée = plusieurs jours ================= */
+function applyDurationLock(){
+  var dur = getDuration();
+  var startEl = document.getElementById('start_date');
+  var endEl = document.getElementById('end_date');
+  var hint = document.getElementById('durHint');
+  if(dur === '2h'){
+    endEl.value = startEl.value;
+    endEl.disabled = true;
+    hint.textContent = 'La location de 2 heures se fait sur une seule journée (date de fin verrouillée).';
+  } else {
+    endEl.disabled = false;
+    hint.textContent = 'Journée complète : vous pouvez sélectionner plusieurs jours.';
+  }
+}
+
+/* ================= Chauffeur / main d'œuvre ================= */
+function onModeChange(){
+  var sel = document.querySelector('input[name="rental_mode"]:checked');
+  document.getElementById('driverNote').classList.toggle('show', !!(sel && sel.value === 'driver'));
+}
+
+/* ================= GPS : distance automatique (temps réel) ================= */
+var distTimer = null;
+var distBusy = false;
+
+function scheduleDistance(){
+  var from = document.getElementById('pickup_address').value.trim();
+  var to = document.getElementById('destination').value.trim();
+  document.getElementById('distResult').classList.remove('show');
+  if(!from || !to){ return; }
+  clearTimeout(distTimer);
+  distTimer = setTimeout(function(){ calcDistance(); }, 900);
+}
+
+function calcDistance(){
+  if(distBusy){ return; }
+  var from = document.getElementById('pickup_address').value.trim();
+  var to = document.getElementById('destination').value.trim();
+  var res = document.getElementById('distResult');
+  var spin = document.getElementById('distSpin');
+  res.classList.remove('show');
+  if(!from || !to){ return; }
+  distBusy = true;
+  spin.classList.add('show');
+  geocode(from).then(function(a){
+    return geocode(to).then(function(b){
+      return {a:a, b:b};
+    });
+  }).then(function(pts){
+    var url = '/api/distance?from_lat='+pts.a.lat+'&from_lon='+pts.a.lon+'&to_lat='+pts.b.lat+'&to_lon='+pts.b.lon;
+    return fetch(url).then(function(r){ return r.json(); }).then(function(d){
+      if(!d.ok){ throw new Error(d.error || 'Erreur'); }
+      res.classList.remove('err');
+      document.getElementById('distKm').textContent = d.km + ' km';
+      document.getElementById('distTime').textContent = '≈ ' + d.minutes + ' min';
+      document.getElementById('distFrom').textContent = pts.a.name;
+      document.getElementById('distTo').textContent = pts.b.name;
+      var pct = Math.max(4, Math.min(100, Math.round(d.km / 60 * 100)));
+      document.getElementById('drFill').style.width = pct + '%';
+      document.getElementById('drMark').style.left = pct + '%';
+      document.getElementById('distance_km').value = d.km;
+      res.classList.add('show');
+    });
+  }).catch(function(err){
+    res.classList.remove('show');
+    document.getElementById('distKm').textContent = '—';
+    document.getElementById('distTime').textContent = err.message || 'Impossible de calculer la distance. Vérifiez vos adresses.';
+    document.getElementById('drFill').style.width = '0%';
+    document.getElementById('drMark').style.left = '0%';
+    document.getElementById('distance_km').value = '0';
+    res.classList.add('show', 'err');
+  }).finally(function(){
+    distBusy = false;
+    spin.classList.remove('show');
+  });
+}
+
+function geocode(q){
+  return fetch('/api/geocode?q='+encodeURIComponent(q))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ throw new Error(d.error || 'Adresse introuvable'); }
+      return d;
+    });
+}
+
+/* ================= Submit ================= */
+function showError(msg){
+  var el = document.getElementById('formError');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function onCageTypeChange(){
+  var sel = document.querySelector('input[name="cage_type"]:checked');
+  var wrap = document.getElementById('cageOtherWrap');
+  var inp = document.getElementById('cage_detail');
+  if(sel && sel.value === 'Autre'){
+    wrap.style.display = '';
+  } else {
+    wrap.style.display = 'none';
+    inp.value = '';
+  }
+}
+
+function submitBooking(ev){
+  ev.preventDefault();
+  var err = document.getElementById('formError');
+  err.classList.remove('show');
+
+  var v = getSelectedVehicle();
+  if(!v || !v.available){
+    showError('Veuillez choisir un véhicule disponible pour vos dates.');
+    return false;
+  }
+  var w = parseFloat(document.getElementById('weight_kg').value);
+  if(isNaN(w) || w < 0){
+    showError('Indiquez le poids du colis en kg.');
+    return false;
+  }
+  if(w > v.capacity_kg){
+    showError('Le poids du colis dépasse la capacité du véhicule ('+v.capacity_kg+' kg).');
+    return false;
+  }
+  var cageType = document.querySelector('input[name="cage_type"]:checked').value;
+  var cageDetail = '';
+  if(cageType === 'Autre'){
+    cageDetail = document.getElementById('cage_detail').value.trim();
+    if(!cageDetail){
+      showError('Précisez le contenu de votre colis (champ obligatoire pour « Autre »).');
+      return false;
+    }
+  }
+  var pickup = document.getElementById('pickup_address').value.trim();
+  var dest = document.getElementById('destination').value.trim();
+  if(!pickup || !dest){
+    showError('Renseignez votre adresse de départ et votre destination.');
+    return false;
+  }
+  var mode = document.querySelector('input[name="rental_mode"]:checked');
+  var driverNeeded = !!(mode && mode.value === 'driver');
+  var pickupDate = document.getElementById('pickup_date').value;
+  var pickupTime = document.getElementById('pickup_time').value;
+  if(!pickupDate || !pickupTime){
+    showError('Indiquez la date et l\'heure à laquelle vous viendrez récupérer le véhicule.');
+    return false;
+  }
+  var exactTime = pickupDate + ' ' + pickupTime;
+
+  var payload = {
+    full_name: document.getElementById('full_name').value,
+    phone: document.getElementById('phone').value,
+    email: document.getElementById('email').value,
+    license_number: document.getElementById('license_number').value,
+    vehicle_id: v.id,
+    cage_type: cageType,
+    cage_detail: cageDetail,
+    weight_kg: w,
+    pickup_address: pickup,
+    destination: dest,
+    distance_km: parseFloat(document.getElementById('distance_km').value) || 0,
+    duration: getDuration(),
+    driver_needed: driverNeeded,
+    payment_method: document.querySelector('input[name="payment_method"]:checked').value,
+    exact_time: exactTime,
+    start_date: document.getElementById('start_date').value,
+    end_date: document.getElementById('end_date').value
+  };
+
+  var btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+
+  fetch('/api/booking', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  })
+  .then(function(r){
+    return r.json().then(function(d){ return {ok:r.ok, status:r.status, data:d}; });
+  })
+  .then(function(res){
+    btn.textContent = 'Réserver maintenant';
+    if(!res.ok){
+      btn.disabled = false;
+      showError(res.data.error || 'Erreur lors de la réservation.');
+      return;
+    }
+    var d = res.data;
+    document.getElementById('successView').classList.add('show');
+    document.getElementById('bookingForm').style.display = 'none';
+    var durLabel = d.duration === 'journee' ? 'Journée complète' : '2 heures';
+    var payLabel = {'credit_card':'Carte de crédit','transfer':'Virement bancaire','cash':'Espèces'}[payload.payment_method] || 'Espèces';
+    var distLine = parseFloat(payload.distance_km) > 0
+      ? '<div class="sr"><span>Distance GPS</span><b>'+payload.distance_km+' km</b></div>'
+      : '';
+    var driverLine = driverNeeded
+      ? '<div class="sr"><span>Chauffeur / main d\'œuvre</span><b>Oui (prix par téléphone)</b></div>'
+      : '';
+    document.getElementById('succRecap').innerHTML =
+      '<div class="sr"><span>N° de réservation</span><b>#'+d.booking_id+'</b></div>'+
+      '<div class="sr"><span>Véhicule</span><b>'+esc(d.vehicle)+'</b></div>'+
+      '<div class="sr"><span>Durée</span><b>'+durLabel+'</b></div>'+
+      '<div class="sr"><span>Heure de prise</span><b>'+esc(payload.exact_time)+'</b></div>'+
+      '<div class="sr"><span>Période</span><b>'+d.start+' → '+d.end+'</b></div>'+
+      '<div class="sr"><span>Départ</span><b>'+esc(payload.pickup_address)+'</b></div>'+
+      '<div class="sr"><span>Destination</span><b>'+esc(payload.destination)+'</b></div>'+
+      distLine+
+      driverLine+
+      '<div class="sr"><span>Paiement</span><b>'+payLabel+' (sur place)</b></div>'+
+      '<div class="sr"><span>Total à payer</span><b>'+priceStr(d.total)+' $</b></div>';
+    document.getElementById('successView').scrollIntoView({behavior:'smooth'});
+    loadVehicles();
+  })
+  .catch(function(){
+    btn.textContent = 'Réserver maintenant';
+    btn.disabled = false;
+    showError('Problème de connexion. Réessayez.');
+  });
+  return false;
+}
+
+function resetBooking(){
+  document.getElementById('successView').classList.remove('show');
+  document.getElementById('bookingForm').style.display = '';
+  document.getElementById('bookingForm').reset();
+  document.getElementById('start_date').value = todayStr(0);
+  document.getElementById('end_date').value = todayStr(1);
+  document.getElementById('distResult').classList.remove('show');
+  document.getElementById('distance_km').value = '0';
+  selectedVehicleId = null;
+  document.getElementById('totalVal').textContent = '—';
+  document.getElementById('totalLabel').textContent = 'Sélectionnez un véhicule et des dates';
+  document.getElementById('submitBtn').disabled = true;
+  onModeChange();
+  loadVehicles();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= Init ================= */
+document.getElementById('start_date').value = todayStr(0);
+document.getElementById('end_date').value = todayStr(1);
+document.getElementById('start_date').min = todayStr(0);
+document.getElementById('end_date').min = todayStr(0);
+document.getElementById('pickup_date').min = todayStr(0);
+document.getElementById('start_date').addEventListener('change', function(){ loadVehicles(); applyDurationLock(); });
+document.getElementById('end_date').addEventListener('change', loadVehicles);
+document.getElementById('pickup_address').addEventListener('input', scheduleDistance);
+document.getElementById('destination').addEventListener('input', scheduleDistance);
+loadVehicles();
+applyDurationLock();
+</script>
+</body>
+</html>

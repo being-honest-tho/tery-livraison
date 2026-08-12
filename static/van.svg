@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 230" fill="none">
+  <defs>
+    <linearGradient id="bodyG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b3a5f"/>
+      <stop offset="1" stop-color="#122741"/>
+    </linearGradient>
+    <linearGradient id="frontG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="windG2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c1a2e"/>
+      <stop offset="1" stop-color="#1f4068"/>
+    </linearGradient>
+    <radialGradient id="glowG2" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f59e0b" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- halo -->
+  <ellipse cx="210" cy="155" rx="195" ry="85" fill="url(#glowG2)"/>
+
+  <!-- speed lines -->
+  <g stroke="#f59e0b" stroke-opacity="0.32" stroke-width="4" stroke-linecap="round">
+    <line x1="10" y1="66" x2="50" y2="66"/>
+    <line x1="4" y1="92" x2="38" y2="92"/>
+    <line x1="12" y1="170" x2="54" y2="170"/>
+    <line x1="6" y1="196" x2="44" y2="196"/>
+  </g>
+
+  <!-- ombre au sol -->
+  <ellipse cx="212" cy="198" rx="160" ry="9" fill="#081220" opacity="0.45"/>
+
+  <!-- châssis -->
+  <rect x="30" y="132" width="340" height="18" rx="7" fill="#0b1a2e" stroke="#23456e" stroke-width="2"/>
+
+  <!-- carrosserie fourgonnette -->
+  <path d="M30 132 L30 62 Q30 48 44 48 L300 48 Q324 48 336 64 L362 100 Q372 112 372 132 Z"
+        fill="url(#bodyG)" stroke="#2c5380" stroke-width="2.5"/>
+  <!-- bande ambre toit -->
+  <path d="M30 60 Q30 48 44 48 L300 48 Q324 48 336 64 L336 74 L30 74 Z" fill="#f59e0b"/>
+  <!-- ligne ambre basse -->
+  <path d="M30 116 L366 116 L366 122 L30 122 Z" fill="#f59e0b" opacity="0.55"/>
+  <!-- vitres latérales -->
+  <rect x="46" y="84" width="52" height="26" rx="6" fill="url(#windG2)" stroke="#0c1a2e" stroke-width="2"/>
+  <rect x="106" y="84" width="70" height="26" rx="6" fill="url(#windG2)" stroke="#0c1a2e" stroke-width="2"/>
+  <!-- pare-brise avant -->
+  <path d="M310 62 Q324 62 332 74 L318 100 L298 100 L306 66 Z" fill="url(#windG2)" stroke="#0c1a2e" stroke-width="2"/>
+  <!-- reflet pare-brise -->
+  <path d="M310 66 Q316 64 322 66 L320 76 L312 76 Z" fill="#ffffff" opacity="0.14"/>
+  <!-- lettrage KARGO -->
+  <text x="156" y="106" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="800" letter-spacing="6" fill="#f59e0b">KARGO</text>
+
+  <!-- roues -->
+  <g>
+    <circle cx="286" cy="156" r="25" fill="#0a1526" stroke="#23456e" stroke-width="3"/>
+    <circle cx="286" cy="156" r="13" fill="none" stroke="#f59e0b" stroke-width="4"/>
+    <circle cx="286" cy="156" r="5" fill="#0a1526"/>
+    <circle cx="98" cy="156" r="25" fill="#0a1526" stroke="#23456e" stroke-width="3"/>
+    <circle cx="98" cy="156" r="13" fill="none" stroke="#f59e0b" stroke-width="4"/>
+    <circle cx="98" cy="156" r="5" fill="#0a1526"/>
+  </g>
+</svg>

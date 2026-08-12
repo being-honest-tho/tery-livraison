@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeryLivraison — Admin</title>
+<link rel="icon" href="/static/truck.svg" type="image/svg+xml">
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f4f6fa;color:#16233a;margin:0;line-height:1.55}
+  *{box-sizing:border-box}
+  .page-head{background:radial-gradient(700px 320px at 88% -20%,rgba(245,158,11,.25),transparent 60%),linear-gradient(152deg,#0b1a2e,#16304f);color:#fff;padding:36px 20px}
+  .page-head-inner{max-width:1180px;margin:0 auto}
+  .page-head h1{font-size:26px;font-weight:800;margin:0}
+  .page-head p{color:#b9c8dd;font-size:14px;margin-top:5px}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 60px;width:100%}
+  .flash{padding:12px 16px;border-radius:10px;font-size:14px;font-weight:600;margin-bottom:16px}
+  .flash.ok{background:#e6f7f0;color:#0ea371;border:1px solid #b5e6d2}
+  .flash.err{background:#fdebec;color:#e5484d;border:1px solid #f5c2c4}
+  .card{background:#fff;border:1px solid #e3e9f2;border-radius:14px;padding:20px;margin-bottom:22px;box-shadow:0 10px 30px rgba(12,26,46,.08)}
+  .card h2{font-size:16px;margin:0 0 14px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #eef2f8;white-space:nowrap}
+  th{color:#5c6b82;font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+  .badge.pending{background:#fdf3e0;color:#92400e}
+  .badge.validated{background:#e6f7f0;color:#0ea371}
+  .badge.refused{background:#fdebec;color:#e5484d}
+  .act{display:inline-flex;gap:6px;margin-left:8px}
+  .act form{display:inline}
+  .btn-mini{border:none;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer;transition:opacity .12s}
+  .btn-mini:hover{opacity:.85}
+  .btn-ok{background:#e6f7f0;color:#0ea371}
+  .btn-no{background:#fdebec;color:#e5484d}
+  .btn-see{background:#eef2f7;color:#16233a}
+  .empty{color:#5c6b82;font-size:14px}
+  .foot{color:#5c6b82;font-size:13px;margin-top:6px}
+  .foot a{color:#f59e0b;font-weight:700;text-decoration:none}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(12,26,46,.55);backdrop-filter:blur(3px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:18px;max-width:520px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(12,26,46,.35);max-height:90vh;overflow-y:auto}
+  .modal h3{font-size:18px;font-weight:800;margin:0 0 4px}
+  .modal .m-sub{color:#5c6b82;font-size:13.5px;margin-bottom:18px}
+  .m-row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px dashed #e3e9f2;font-size:14px}
+  .m-row:last-child{border-bottom:none}
+  .m-row span{color:#5c6b82}
+  .m-row b{color:#16233a;text-align:right}
+  .m-close{margin-top:18px;width:100%;background:#0b1a2e;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+  @media(max-width:900px){ table{display:block;overflow-x:auto} th,td{min-width:110px} }
+  @media(max-width:700px){
+    .page-head{padding:28px 16px}
+    .wrap{padding:20px 14px 50px}
+    .card{padding:16px 14px}
+    .modal{padding:20px 16px}
+  }
+</style>
+</head>
+<body>
+
+{% include '_sidebar.html' %}
+
+<div class="app-main">
+  <div class="page-head">
+    <div class="page-head-inner">
+      <h1>Réservations</h1>
+      <p>Gérez les réservations des clients : consultez les détails, validez ou refusez.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+    {% endwith %}
+
+    <div class="card">
+      <h2 style="display:flex;align-items:center;gap:9px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>Réservations clients ({{ bookings|length }})</h2>
+      {% if bookings %}
+      <table>
+        <tr><th>#</th><th>Client</th><th>Véhicule</th><th>Période</th><th>Total</th><th>Statut</th><th>Actions</th></tr>
+        {% for b in bookings %}
+        <tr>
+          <td>{{ b.id }}</td>
+          <td>{{ b.full_name }}<br><span style="color:#5c6b82;font-size:12px">{{ b.phone }}</span></td>
+          <td>{{ b.vehicle_name }}</td>
+          <td>{{ b.start_date }} → {{ b.end_date }}</td>
+          <td><b>{{ b.total_price }} $</b></td>
+          <td><span class="badge {{ b.status }}">{% if b.status == 'pending' %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{% elif b.status == 'validated' %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% elif b.status == 'refused' %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>{% endif %} {{ {'pending':'En attente','validated':'Validée','refused':'Refusée'}.get(b.status, b.status) }}</span></td>
+          <td>
+            <button class="btn-mini btn-see" onclick="showDetails({{ b.id }})">Détails</button>
+            {% if b.status == 'pending' %}
+            <span class="act">
+              <form method="post" action="/admin/bookings/{{ b.id }}/status">
+                <input type="hidden" name="status" value="validated">
+                <button class="btn-mini btn-ok" type="submit">Valider</button>
+              </form>
+              <form method="post" action="/admin/bookings/{{ b.id }}/status">
+                <input type="hidden" name="status" value="refused">
+                <button class="btn-mini btn-no" type="submit">Refuser</button>
+              </form>
+            </span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <p class="empty">Aucune réservation pour le moment.</p>
+      {% endif %}
+    </div>
+
+    <p class="foot" style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><a href="/">Retour au site</a> · <a href="/admin/vehicules">État du parc</a></p>
+  </div>
+
+  <div class="modal-bg" id="detailsModal">
+    <div class="modal">
+      <h3 id="dmTitle">Réservation</h3>
+      <p class="m-sub" id="dmSub"></p>
+      <div id="dmBody"></div>
+      <button class="m-close" onclick="closeDetails()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var BOOKINGS = {{ bookings_json|safe }};
+var STATUS_LABEL = {'pending':'En attente','validated':'Validée','refused':'Refusée'};
+
+function showDetails(id){
+  var b = BOOKINGS.find(function(x){ return x.id === id; });
+  if(!b){ return; }
+  document.getElementById('dmTitle').textContent = 'Réservation #' + b.id;
+  document.getElementById('dmSub').textContent = 'Reçue le ' + b.created_at;
+  var rows = [
+    ['Client', b.full_name],
+    ['Email', b.user_email || b.email || '—'],
+    ['Téléphone', b.phone],
+    ['Permis de conduire', b.license_number],
+    ['Véhicule', b.vehicle_name],
+    ['Durée', {'2h':'2 heures','journee':'Journée complète'}[b.duration] || b.duration],
+    ['Récupération', b.exact_time || '—'],
+    ['Colis', b.cage_type + (b.cage_detail ? ' — ' + b.cage_detail : '')],
+    ['Poids', b.weight_kg + ' kg'],
+    ['Adresse de départ', b.pickup_address || '—'],
+    ['Destination', b.destination],
+    ['Distance GPS', (b.distance_km && b.distance_km > 0) ? b.distance_km + ' km' : '—'],
+    ['Chauffeur / main d\'œuvre', b.driver_needed ? 'Oui (prix par téléphone)' : 'Non'],
+    ['Paiement', {'credit_card':'Carte de crédit','transfer':'Virement bancaire','cash':'Espèces'}[b.payment_method] || b.payment_method],
+    ['Période', b.start_date + ' → ' + b.end_date],
+    ['Total', b.total_price + ' $'],
+    ['Statut', STATUS_LABEL[b.status] || b.status],
+  ];
+  document.getElementById('dmBody').innerHTML = rows.map(function(r){
+    return '<div class="m-row"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>';
+  }).join('');
+  document.getElementById('detailsModal').classList.add('show');
+}
+function closeDetails(){ document.getElementById('detailsModal').classList.remove('show'); }
+document.getElementById('detailsModal').addEventListener('click', function(e){
+  if(e.target === this){ closeDetails(); }
+});
+</script>
+</body>
+</html>

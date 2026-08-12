@@ -1,0 +1,116 @@
+<!-- ================= SIDEBAR (partagée) ================= -->
+<style>
+  .app{display:flex;min-height:100vh}
+  .side{width:240px;background:#0b1a2e;color:#c3d0e2;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:70;transition:transform .22s ease}
+  .side-head{padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .side-brand{display:flex;align-items:center;gap:13px}
+  .side-logo{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#f59e0b,#e07b00);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 20px rgba(245,158,11,.35);flex-shrink:0}
+  .side-name{font-size:19px;font-weight:800;color:#fff;letter-spacing:.3px}
+  .side-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:5px}
+  .side-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:11px;color:#93a5c0;text-decoration:none;font-size:14.5px;font-weight:600;transition:all .15s}
+  .side-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side-item.active{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(245,158,11,.06));color:#fbbf24;font-weight:800}
+  .side-item svg{flex-shrink:0}
+  .side-foot{padding:14px 12px;border-top:1px solid rgba(255,255,255,.08)}
+  .side-profile{position:relative}
+  .side-profile-btn{width:100%;display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 12px;color:#fff;cursor:pointer;font-family:inherit}
+  .side-profile-btn:hover{background:rgba(255,255,255,.09)}
+  .pp-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#e07b00);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .pp-txt{flex:1;text-align:left;min-width:0}
+  .pp-name{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pp-mail{display:block;font-size:11.5px;color:#8fa3c2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pp-caret{color:#8fa3c2;flex-shrink:0}
+  .pp-drop{position:absolute;bottom:calc(100% + 10px);left:0;right:0;background:#fff;border-radius:14px;box-shadow:0 18px 44px rgba(12,26,46,.32);padding:16px;display:none;z-index:80}
+  .pp-drop.open{display:block}
+  .pp-drop .d-name{font-weight:800;color:#16233a;font-size:14.5px}
+  .pp-drop .d-line{font-size:12.5px;color:#5c6b82;margin-top:3px;word-break:break-all}
+  .pp-drop .d-line b{color:#16233a}
+  .pp-drop .d-logout{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;background:#fdebec;color:#e5484d;border:none;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700;text-decoration:none;font-family:inherit;cursor:pointer}
+  .pp-drop .d-logout:hover{background:#f8d5d7}
+  .app-main{flex:1;margin-left:240px;min-width:0;display:flex;flex-direction:column}
+  .side-close{display:none}
+  .side-overlay{display:none}
+  .app-hamburger{display:none}
+  @media(max-width:900px){
+    .side{transform:translateX(-100%)}
+    .side.open{transform:translateX(0)}
+    .app-main{margin-left:0}
+    .side-close{display:flex;position:absolute;top:14px;right:12px;background:none;border:none;color:#93a5c0;font-size:24px;cursor:pointer;line-height:1;padding:6px}
+    .side-overlay{position:fixed;inset:0;background:rgba(7,18,33,.55);z-index:65}
+    .side-overlay.open{display:block}
+    .app-hamburger{display:flex;position:fixed;top:14px;left:14px;z-index:60;width:42px;height:42px;border-radius:11px;background:#0b1a2e;color:#fff;border:none;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(12,26,46,.28);cursor:pointer}
+  }
+</style>
+
+<button class="app-hamburger" onclick="openSide()" aria-label="Menu">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+</button>
+
+<aside class="side" id="side">
+  <button class="side-close" onclick="closeSide()" aria-label="Fermer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  <div class="side-head">
+    <div class="side-brand">
+      <div class="side-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+      </div>
+      <span class="side-name">TeryLivraison</span>
+    </div>
+  </div>
+  <nav class="side-nav">
+    {% set icons = {
+      'Accueil': '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+      'Mes réservations': '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>',
+      'Réservations': '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18M9 14l2 2 4-4"/></svg>',
+      'Parc': '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>'
+    } %}
+    {% for item in side_items %}
+    <a class="side-item{% if item.active %} active{% endif %}" href="{{ item.url }}">
+      {{ icons.get(item.label, '')|safe }}
+      {{ item.label }}
+    </a>
+    {% endfor %}
+  </nav>
+  <div class="side-foot">
+    <div class="side-profile">
+      <button class="side-profile-btn" onclick="toggleProfile(event)" aria-label="Profil">
+        <span class="pp-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        <span class="pp-txt">
+          <span class="pp-name">{{ current_user['full_name'] }}</span>
+          <span class="pp-mail">{{ current_user['email'] or '—' }}</span>
+        </span>
+        <svg class="pp-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="pp-drop" id="ppDrop">
+        <div class="d-name">{{ current_user['full_name'] }}</div>
+        <div class="d-line"><b>Email :</b> {{ current_user['email'] or '—' }}</div>
+        <div class="d-line"><b>Téléphone :</b> {{ current_user['phone'] or '—' }}</div>
+        <a class="d-logout" href="/logout">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Déconnexion
+        </a>
+      </div>
+    </div>
+  </div>
+</aside>
+<div class="side-overlay" id="sideOverlay" onclick="closeSide()"></div>
+
+<script>
+function toggleProfile(e){
+  if(e){ e.stopPropagation(); }
+  document.getElementById('ppDrop').classList.toggle('open');
+}
+function openSide(){
+  document.getElementById('side').classList.add('open');
+  document.getElementById('sideOverlay').classList.add('open');
+}
+function closeSide(){
+  document.getElementById('side').classList.remove('open');
+  document.getElementById('sideOverlay').classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  var d = document.getElementById('ppDrop');
+  if(d && d.classList.contains('open') && !e.target.closest('.side-profile')){
+    d.classList.remove('open');
+  }
+});
+</script>

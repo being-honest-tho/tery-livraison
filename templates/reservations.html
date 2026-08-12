@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes réservations — TeryLivraison</title>
+<link rel="icon" href="/static/truck.svg" type="image/svg+xml">
+<style>
+  :root{
+    --navy:#0b1a2e; --navy-2:#10233c; --navy-3:#16304f;
+    --amber:#f59e0b; --amber-h:#fbbf24; --amber-soft:#fdf3e0;
+    --bg:#f4f6fa; --card:#fff; --text:#16233a; --muted:#5c6b82;
+    --line:#e3e9f2; --green:#0ea371; --red:#e5484d;
+    --radius:16px; --shadow:0 10px 30px rgba(12,26,46,.10);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.55}
+  a{text-decoration:none}
+
+  .page-head{background:radial-gradient(700px 320px at 88% -20%,rgba(245,158,11,.25),transparent 60%),linear-gradient(152deg,#0b1a2e,#16304f);color:#fff;padding:44px 20px}
+  .page-head-inner{max-width:1080px;margin:0 auto}
+  .page-head h1{font-size:28px;font-weight:800;letter-spacing:-.4px}
+  .page-head p{color:#b9c8dd;font-size:14.5px;margin-top:6px}
+  .wrap{max-width:1080px;margin:0 auto;padding:34px 20px 60px;width:100%}
+
+  .res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;align-items:stretch}
+  .res-card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .16s}
+  .res-card:hover{transform:translateY(-3px)}
+  .res-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;background:linear-gradient(150deg,#0e2140,#16304f);color:#fff}
+  .res-top b{font-size:15.5px}
+  .res-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:9px;font-size:14px}
+  .r-line{display:flex;justify-content:space-between;gap:12px}
+  .r-line span{color:var(--muted)}
+  .r-line b{color:var(--navy)}
+  .r-total{display:flex;justify-content:space-between;border-top:1px dashed var(--line);padding-top:11px;margin-top:2px}
+  .r-total span{color:var(--muted);font-size:13.5px}
+  .r-total b{font-size:18px;color:#b45309}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+  .badge.pending{background:#fdf3e0;color:#92400e}
+  .badge.validated{background:#e6f7f0;color:var(--green)}
+  .badge.refused{background:#fdebec;color:var(--red)}
+
+  .empty{text-align:center;padding:60px 20px;background:var(--card);border:1.5px dashed var(--line);border-radius:var(--radius)}
+  .empty .e-ic{width:64px;height:64px;border-radius:50%;background:var(--amber-soft);color:#b45309;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+  .empty h3{font-size:19px;font-weight:800;color:var(--navy)}
+  .empty p{color:var(--muted);font-size:14px;margin:8px 0 20px}
+  .btn{display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--amber),#e07b00);color:#fff;border:none;border-radius:12px;padding:13px 26px;font-size:14.5px;font-weight:800;box-shadow:0 8px 20px rgba(245,158,11,.35)}
+  @media(max-width:700px){
+    .res-grid{grid-template-columns:1fr}
+    .page-head{padding:32px 16px}
+    .wrap{padding:24px 14px 50px}
+    .r-line{flex-wrap:wrap}
+    .res-body{font-size:13.5px}
+  }
+</style>
+</head>
+<body>
+
+{% include '_sidebar.html' %}
+
+<div class="app-main">
+  <div class="page-head">
+    <div class="page-head-inner">
+      <h1>Mes réservations</h1>
+      <p>Retrouvez ici toutes vos réservations et leur statut.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    {% if bookings %}
+    <div class="res-grid">
+      {% for b in bookings %}
+      {% set st = {'pending':'En attente','validated':'Validée','refused':'Refusée'}.get(b.status, b.status) %}
+      <div class="res-card">
+        <div class="res-top">
+          <b style="display:inline-flex;align-items:center;gap:7px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>{{ b.vehicle_name }}</b>
+          <span class="badge {{ b.status }}">{% if b.status == 'pending' %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{% elif b.status == 'validated' %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% elif b.status == 'refused' %}<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>{% endif %} {{ st }}</span>
+        </div>
+        <div class="res-body">
+          <div class="r-line"><span>Période</span><b>{{ b.start_date }} → {{ b.end_date }}</b></div>
+          <div class="r-line"><span>Durée</span><b>{{ {'2h':'2 heures','journee':'Journée complète'}.get(b.duration, b.duration) }}</b></div>
+          {% if b.exact_time %}<div class="r-line"><span>Récupération</span><b>{{ b.exact_time }}</b></div>{% endif %}
+          <div class="r-line"><span>Départ</span><b>{{ b.pickup_address or b.destination }}</b></div>
+          <div class="r-line"><span>Destination</span><b>{{ b.destination }}</b></div>
+          {% if b.distance_km and b.distance_km > 0 %}<div class="r-line"><span>Distance GPS</span><b>{{ b.distance_km }} km</b></div>{% endif %}
+          {% if b.driver_needed %}<div class="r-line"><span>Chauffeur / main d'œuvre</span><b>Oui</b></div>{% endif %}
+          <div class="r-line"><span>Colis</span><b>{{ b.cage_type }}{% if b.cage_detail %} — {{ b.cage_detail }}{% endif %}</b></div>
+          <div class="r-line"><span>Poids</span><b>{{ b.weight_kg }} kg</b></div>
+          <div class="r-line"><span>Paiement</span><b>{{ {'credit_card':'Carte de crédit','transfer':'Virement','cash':'Espèces'}.get(b.payment_method, b.payment_method) }}</b></div>
+          <div class="r-line"><span>Réservée le</span><b>{{ b.created_at }}</b></div>
+          <div class="r-total"><span>Total</span><b>{{ b.total_price }} $</b></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+      <div class="e-ic">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+      </div>
+      <h3>Aucune réservation pour le moment</h3>
+      <p>Réservez votre premier véhicule, il apparaîtra ici avec son statut.</p>
+      <a class="btn" href="/reserver">Réserver un véhicule</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscription — TeryLivraison</title>
+<link rel="icon" href="/static/truck.svg" type="image/svg+xml">
+<style>
+  :root{--navy:#0b1a2e;--navy-2:#10233c;--navy-3:#16304f;--amber:#f59e0b;--amber-h:#fbbf24;--amber-soft:#fdf3e0;--bg:#f4f6fa;--card:#fff;--text:#16233a;--muted:#5c6b82;--line:#e3e9f2;--red:#e5484d;--green:#0ea371;
+    --radius:16px;--shadow:0 14px 40px rgba(12,26,46,.18);--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;
+    background:radial-gradient(800px 480px at 88% -10%,rgba(245,158,11,.2),transparent 60%),
+               radial-gradient(700px 420px at -10% 110%,rgba(29,58,96,.9),transparent 62%),
+               linear-gradient(155deg,#071221 0%,#0b1a2e 55%,#122741 100%);color:var(--text)}
+  .topbar{max-width:1180px;margin:0 auto;width:100%;padding:22px 24px;display:flex;align-items:center}
+  .logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:800;font-size:21px;text-decoration:none;letter-spacing:.5px}
+  .logo-badge{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--amber),#e07b00);display:flex;align-items:center;justify-content:center;color:#fff}
+  .auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px 20px 70px}
+  .auth-card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);width:100%;max-width:440px;padding:40px 38px;position:relative;overflow:hidden}
+  .auth-card::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--amber),#e07b00)}
+  .auth-ic{width:54px;height:54px;border-radius:15px;background:var(--amber-soft);color:#b45309;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+  .auth-card h1{font-size:24px;font-weight:800;color:var(--navy);margin-bottom:6px}
+  .auth-card .sub{color:var(--muted);font-size:14px;margin-bottom:26px}
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+  .field label{font-size:13.5px;font-weight:700;color:var(--navy)}
+  .field label .req{color:var(--red)}
+  .field label .opt{color:var(--muted);font-weight:600;font-size:12.5px}
+  .field input{border:1.5px solid var(--line);border-radius:11px;padding:13px 15px;font-size:15px;color:var(--text);background:#fbfcfe;outline:none;transition:border-color .15s,box-shadow .15s}
+  .field input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16);background:#fff}
+  .auth-error{display:none;background:#fdebec;border:1px solid #f5c2c4;color:var(--red);font-size:13.5px;font-weight:600;border-radius:10px;padding:11px 14px;margin-bottom:16px}
+  .auth-error.show{display:block}
+  .btn{display:flex;align-items:center;justify-content:center;gap:9px;border:none;border-radius:12px;padding:14px;font-size:15.5px;font-weight:800;text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .15s;width:100%}
+  .auth-card .btn{width:100%;padding:14px}
+  .btn:active{transform:scale(.98)}
+  .btn-amber{background:linear-gradient(135deg,var(--amber),#e07b00);color:#fff;box-shadow:0 8px 20px rgba(245,158,11,.35)}
+  .btn-amber:hover{box-shadow:0 10px 26px rgba(245,158,11,.5)}
+  .auth-alt{text-align:center;margin-top:20px;font-size:14px;color:var(--muted)}
+  .auth-alt a{color:#b45309;font-weight:800;text-decoration:none}
+  .auth-alt a:hover{text-decoration:underline}
+  .auth-back{text-align:center;margin-top:16px;font-size:13.5px}
+  .auth-back a{color:#8fa3c2;text-decoration:none}
+  .auth-back a:hover{color:var(--amber-h)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a class="logo" href="/">
+    <span class="logo-badge">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+    </span>
+    TeryLivraison
+  </a>
+</div>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-ic">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <h1>Créer un compte</h1>
+    <p class="sub">2 minutes, gratuit — pour réserver vos véhicules.</p>
+    {% if error %}<div class="auth-error show">{{ error }}</div>{% endif %}
+    <form method="post" action="/register" novalidate>
+      <div class="field">
+        <label for="full_name">Nom complet <span class="req">*</span></label>
+        <input type="text" id="full_name" name="full_name" placeholder="Ex : Jean Kalala" required autofocus>
+      </div>
+      <div class="field">
+        <label for="email">Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" placeholder="vous@exemple.com" required>
+      </div>
+      <div class="field">
+        <label for="phone">Téléphone <span class="req">*</span></label>
+        <input type="tel" id="phone" name="phone" placeholder="Ex : +243 990 000 000" required>
+      </div>
+      <div class="field">
+        <label for="password">Mot de passe <span class="req">*</span></label>
+        <input type="password" id="password" name="password" placeholder="6 caractères minimum" required>
+      </div>
+      <button class="btn btn-amber" type="submit">Créer mon compte</button>
+    </form>
+    <p class="auth-alt">Déjà inscrit ? <a href="/login">Connectez-vous</a></p>
+    <p class="auth-back"><a href="/">← Retour à l'accueil</a></p>
+  </div>
+</div>
+
+<!-- ================= WIDGETS ================= -->
+{% include '_widgets.html' %}
+<script>autoOpenChat(5000);</script>
+</body>
+</html>

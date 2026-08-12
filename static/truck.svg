@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 230" fill="none">
+  <defs>
+    <linearGradient id="boxG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b3a5f"/>
+      <stop offset="1" stop-color="#122741"/>
+    </linearGradient>
+    <linearGradient id="cabG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="windG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c1a2e"/>
+      <stop offset="1" stop-color="#1f4068"/>
+    </linearGradient>
+    <radialGradient id="glowG" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f59e0b" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- halo -->
+  <ellipse cx="210" cy="160" rx="200" ry="90" fill="url(#glowG)"/>
+
+  <!-- speed lines -->
+  <g stroke="#f59e0b" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round">
+    <line x1="10" y1="70" x2="52" y2="70"/>
+    <line x1="4" y1="95" x2="40" y2="95"/>
+    <line x1="14" y1="120" x2="58" y2="120"/>
+    <line x1="6" y1="175" x2="46" y2="175"/>
+    <line x1="12" y1="200" x2="50" y2="200"/>
+  </g>
+
+  <!-- ombre au sol -->
+  <ellipse cx="215" cy="203" rx="165" ry="10" fill="#081220" opacity="0.45"/>
+
+  <!-- châssis -->
+  <rect x="28" y="136" width="352" height="20" rx="8" fill="#0b1a2e" stroke="#23456e" stroke-width="2"/>
+
+  <!-- caisse de chargement -->
+  <rect x="28" y="44" width="236" height="94" rx="10" fill="url(#boxG)" stroke="#2c5380" stroke-width="2.5"/>
+  <!-- bande ambre toit -->
+  <rect x="28" y="44" width="236" height="13" rx="9" fill="#f59e0b"/>
+  <!-- ligne ambre fine -->
+  <rect x="28" y="122" width="236" height="4" fill="#f59e0b" opacity="0.55"/>
+  <!-- porte arrière -->
+  <rect x="36" y="66" width="26" height="52" rx="5" fill="#0f2340" stroke="#2c5380" stroke-width="2"/>
+  <!-- lettrage KARGO -->
+  <text x="150" y="100" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" letter-spacing="6" fill="#f59e0b">KARGO</text>
+
+  <!-- cabine -->
+  <path d="M258 136 L258 66 Q258 52 272 52 L300 52 Q330 52 342 74 L368 110 Q380 124 382 136 Z"
+        fill="url(#cabG)" stroke="#b45309" stroke-width="2.5"/>
+  <!-- pare-brise -->
+  <path d="M266 64 Q266 56 274 56 L296 56 Q318 56 328 74 L308 108 L266 108 Z"
+        fill="url(#windG)" stroke="#0c1a2e" stroke-width="2"/>
+  <!-- reflet pare-brise -->
+  <path d="M276 62 Q282 60 288 62 L284 74 L276 74 Z" fill="#ffffff" opacity="0.14"/>
+  <!-- porte cabine -->
+  <path d="M352 112 L366 124 L366 134 L352 134 Z" fill="#0c1a2e" opacity="0.25"/>
+
+  <!-- roues -->
+  <g>
+    <circle cx="332" cy="160" r="27" fill="#0a1526" stroke="#23456e" stroke-width="3"/>
+    <circle cx="332" cy="160" r="14" fill="none" stroke="#f59e0b" stroke-width="4"/>
+    <circle cx="332" cy="160" r="5" fill="#0a1526"/>
+    <circle cx="96" cy="160" r="27" fill="#0a1526" stroke="#23456e" stroke-width="3"/>
+    <circle cx="96" cy="160" r="14" fill="none" stroke="#f59e0b" stroke-width="4"/>
+    <circle cx="96" cy="160" r="5" fill="#0a1526"/>
+  </g>
+</svg>

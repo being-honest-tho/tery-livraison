@@ -1,0 +1,211 @@
+<!-- ================= WIDGETS : CHAT + APPEL (partagé) ================= -->
+<style>
+  .chat-fab{position:fixed;right:22px;bottom:22px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#e07b00);color:#fff;border:none;box-shadow:0 10px 26px rgba(245,158,11,.45);display:flex;align-items:center;justify-content:center;z-index:90;transition:transform .15s}
+  .chat-fab:hover{transform:scale(1.07)}
+  .chat-fab .ping{position:absolute;inset:0;border-radius:50%;border:2px solid #f59e0b;animation:kping 2s ease-out infinite}
+  @keyframes kping{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.45);opacity:0}}
+  .chat-panel{position:fixed;right:22px;bottom:94px;width:370px;height:520px;max-height:calc(100vh - 120px);background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(12,26,46,.25);display:flex;flex-direction:column;z-index:91;overflow:hidden;transform-origin:bottom right;transition:transform .18s ease,opacity .18s ease}
+  .chat-panel.closed{transform:scale(.6);opacity:0;pointer-events:none}
+  .chat-head{background:#0c1a2e;color:#fff;padding:15px 18px;display:flex;align-items:center;gap:12px}
+  .chat-head .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#e07b00);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+  .chat-head b{font-size:15px;display:block}
+  .chat-head small{font-size:12px;color:#8fa3c2;display:flex;align-items:center;gap:5px}
+  .chat-head .online{width:8px;height:8px;border-radius:50%;background:#0ea371}
+  .chat-msgs{flex:1;overflow-y:auto;padding:18px;background:#f7f9fc;display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:85%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .msg.bot{background:#fff;border:1px solid #e3e9f2;border-bottom-left-radius:4px;align-self:flex-start;color:#16233a}
+  .msg.user{background:#0c1a2e;color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+  .msg.typing{display:flex;gap:5px;align-items:center;padding:14px}
+  .msg.typing i{width:7px;height:7px;border-radius:50%;background:#94a3b8;animation:kblink 1.2s infinite}
+  .msg.typing i:nth-child(2){animation-delay:.2s}
+  .msg.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes kblink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  .chat-chips{display:flex;gap:8px;padding:0 14px 10px;flex-wrap:wrap;background:#f7f9fc}
+  .chat-chips button{border:1px solid #e3e9f2;background:#fff;color:#0c1a2e;border-radius:999px;font-size:12.5px;font-weight:600;padding:7px 12px;cursor:pointer;transition:all .15s}
+  .chat-chips button:hover{border-color:#f59e0b;color:#92400e;background:#fdf3e0}
+  .chat-input{display:flex;gap:10px;padding:12px 14px;border-top:1px solid #e3e9f2;background:#fff}
+  .chat-input input{flex:1;border:1.5px solid #e3e9f2;border-radius:999px;padding:11px 16px;font-size:14px;font-family:inherit;outline:none}
+  .chat-input input:focus{border-color:#f59e0b}
+  .chat-input button{width:44px;height:44px;border-radius:50%;background:#0c1a2e;color:#fff;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+  .chat-input button:disabled{background:#cbd5e1}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:none;border-radius:12px;padding:14px 26px;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s,background .15s}
+  .btn:active{transform:scale(.98)}
+  .btn-amber{background:linear-gradient(135deg,#f59e0b,#e07b00);color:#fff;box-shadow:0 8px 20px rgba(245,158,11,.35)}
+  .btn-amber:hover{box-shadow:0 10px 26px rgba(245,158,11,.5)}
+
+  @media (max-width:700px){
+    .chat-panel{right:10px;left:10px;bottom:88px;width:auto;height:min(560px,calc(100vh - 110px))}
+    .chat-fab{right:16px;bottom:16px}
+  }
+</style>
+
+<!-- CHAT FAB -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Assistant">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.5 0-2.9-.4-4.1-1L3 20l1.2-5.4A8.3 8.3 0 1 1 21 11.5z"/></svg>
+  <span class="ping"></span>
+</button>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel closed" id="chatPanel">
+  <div class="chat-head">
+    <div class="avatar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <div>
+      <b>Assistant TeryLivraison</b>
+      <small><span class="online"></span> En ligne — réponses instantanées</small>
+    </div>
+  </div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <div class="chat-chips" id="chatChips">
+    <button onclick="askBot('Quels véhicules sont disponibles aujourd\'hui ?')">Quels véhicules sont dispo ?</button>
+    <button onclick="askBot('Guide-moi pour remplir le formulaire de réservation')">Guide-moi pour réserver</button>
+    <button onclick="askBot('Je veux réserver par téléphone')">Réserver par téléphone</button>
+    <button onclick="askBot('Quels sont les prix ?')">Quels sont les prix ?</button>
+  </div>
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="Écrivez votre question…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button id="chatSend" onclick="sendChat()" aria-label="Envoyer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ===== Sons (Web Audio — aucun fichier externe) ===== */
+var kAudio = null;
+function kBeep(freq, dur, delay, type){
+  try{
+    if(!kAudio){ kAudio = new (window.AudioContext || window.webkitAudioContext)(); }
+    if(kAudio.state === 'suspended'){ kAudio.resume(); }
+    var t = kAudio.currentTime + (delay || 0);
+    var o = kAudio.createOscillator();
+    var g = kAudio.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(kAudio.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }catch(e){}
+}
+function soundSend(){ kBeep(880, 0.12, 0, 'sine'); }
+function soundReceive(){ kBeep(660, 0.1, 0, 'sine'); kBeep(990, 0.16, 0.11, 'sine'); }
+
+/* ===== Chat ===== */
+var PHONE = {{ company_phone|tojson }};
+var chatSessionId = localStorage.getItem('terylivraison_chat_session') || '';
+var chatOpened = false;
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ===== Icônes SVG (lucide-style, partagées) ===== */
+var ICONS = {
+  clock:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  scale:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg>',
+  fuel:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg>',
+  phone:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>',
+  mail:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>',
+  truck:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>',
+  van:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h12v7H1zM13 12h4l3 2.5V16h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg>',
+  package:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>',
+  card:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  bank:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M3 8l9-5 9 5"/></svg>',
+  cash:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>',
+  warn:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  worker:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>',
+  sofa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2M20 18v2"/></svg>',
+  tv:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/></svg>',
+  timer:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></svg>',
+  calendar:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  car:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H8.5c-.7 0-1.3.3-1.8.7L4.5 10s-2.7.6-4.5 1.1c-.8.2-1.5 1-1.5 1.9v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>',
+  pin:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  cross:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  pending:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  user:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  info:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 12v4"/></svg>',
+  clipboard:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>',
+  arrow:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>'
+};
+function ic(n, s){
+  var i = ICONS[n] || '';
+  if(i && s){ i = i.replace('width="15"','width="'+s+'"').replace('height="15"','height="'+s+'"'); }
+  return i;
+}
+
+function toggleChat(skipFocus){
+  var p = document.getElementById('chatPanel');
+  chatOpened = !chatOpened;
+  p.classList.toggle('closed', !chatOpened);
+  if(chatOpened && !document.getElementById('chatMsgs').children.length){
+    addMsg('bot','Bonjour ! Je suis l\'assistant TeryLivraison. Je connais la disponibilité des véhicules et je peux vous guider pas à pas pour remplir votre réservation — ou vous aider à réserver par téléphone au ' + PHONE + '. Comment puis-je vous aider ?');
+  }
+  if(chatOpened && !skipFocus){ document.getElementById('chatInput').focus(); }
+}
+function openChat(){ if(!chatOpened){ toggleChat(); } }
+function autoOpenChat(delay){
+  setTimeout(function(){
+    if(!chatOpened){ toggleChat(true); }
+  }, delay || 5000);
+}
+
+function addMsg(role, text){
+  var m = document.getElementById('chatMsgs');
+  var div = document.createElement('div');
+  div.className = 'msg '+role;
+  div.innerHTML = esc(text).replace(/\n/g,'<br>');
+  m.appendChild(div);
+  m.scrollTop = m.scrollHeight;
+  return div;
+}
+
+function askBot(q){
+  document.getElementById('chatInput').value = q;
+  sendChat();
+}
+
+function sendChat(){
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if(!text){ return; }
+  input.value = '';
+  addMsg('user', text);
+
+  var typing = document.createElement('div');
+  typing.className = 'msg bot typing';
+  typing.innerHTML = '<i></i><i></i><i></i>';
+  document.getElementById('chatMsgs').appendChild(typing);
+  document.getElementById('chatMsgs').scrollTop = document.getElementById('chatMsgs').scrollHeight;
+
+  var btn = document.getElementById('chatSend');
+  btn.disabled = true;
+  soundSend();
+
+  fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({message:text, session_id:chatSessionId})
+  })
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
+  .then(function(res){
+    typing.remove();
+    btn.disabled = false;
+    if(res.ok && res.data.reply){
+      chatSessionId = res.data.session_id || chatSessionId;
+      localStorage.setItem('terylivraison_chat_session', chatSessionId);
+      addMsg('bot', res.data.reply);
+      soundReceive();
+    } else {
+      addMsg('bot',(res.data.error || 'Le service est momentanément indisponible. Réessayez ou appelez-nous directement au ' + PHONE + '.'));
+    }
+  })
+  .catch(function(){
+    typing.remove();
+    btn.disabled = false;
+    addMsg('bot','Problème de connexion. Réessayez ou appelez-nous directement au ' + PHONE + '.');
+  });
+}
+</script>

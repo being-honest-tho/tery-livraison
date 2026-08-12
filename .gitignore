@@ -1,0 +1,18 @@
+# Secrets & config locale
+config.json
+
+# Base de données (données clients — ne jamais publier)
+delivery.db
+delivery.db.bak-*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
+
+# Environnements
+.venv/
+venv/
