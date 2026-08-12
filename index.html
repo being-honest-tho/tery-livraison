@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<!-- Aperçu statique généré depuis l'app Flask le 2026-08-13 — réservation/chat/dispo temps réel nécessitent le serveur (PythonAnywhere). -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeryLivraison — Location de camions &amp; fourgonnettes partout au Québec</title>
+<link rel="icon" href="static/truck.svg" type="image/svg+xml">
+<style>
+  :root{
+    --navy:#0b1a2e; --navy-2:#10233c; --navy-3:#16304f; --navy-4:#1d3a60;
+    --amber:#f59e0b; --amber-h:#fbbf24; --amber-soft:#fdf3e0;
+    --bg:#f4f6fa; --card:#ffffff; --text:#16233a; --muted:#5c6b82;
+    --line:#e3e9f2; --green:#0ea371; --red:#e5484d;
+    --radius:16px; --shadow:0 10px 30px rgba(12,26,46,.10);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.55}
+  img,svg{display:block}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit}
+  a{text-decoration:none}
+
+  /* ---------- Navbar ---------- */
+  nav{position:fixed;top:0;left:0;right:0;z-index:60;background:rgba(7,18,33,.35);backdrop-filter:blur(8px);transition:background .25s,box-shadow .25s}
+  nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);box-shadow:0 4px 20px rgba(12,26,46,.08)}
+  .nav-inner{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:26px}
+  .logo{display:flex;align-items:center;gap:10px;color:#fff;font-weight:800;font-size:21px;letter-spacing:.5px;transition:color .25s}
+  nav.scrolled .logo{color:var(--navy)}
+  .logo-badge{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--amber),#e07b00);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+  .nav-links{display:flex;gap:26px;margin-left:auto;align-items:center}
+  .nav-links a{color:#dbe4f0;font-weight:600;font-size:15px;transition:color .15s}
+  .nav-links a:hover{color:var(--amber-h)}
+  nav.scrolled .nav-links a{color:var(--muted)}
+  nav.scrolled .nav-links a:hover{color:var(--navy)}
+  .nav-cta{display:flex;gap:10px;align-items:center}
+  .nav-login{background:transparent;border:1.5px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:9px 18px;font-size:14px;font-weight:700;transition:all .15s}
+  .nav-login:hover{background:rgba(255,255,255,.12)}
+  nav.scrolled .nav-login{color:var(--navy);border-color:var(--line)}
+  nav.scrolled .nav-login:hover{background:#eef2f7}
+  .nav-reserve{background:linear-gradient(135deg,var(--amber),#e07b00);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:800;box-shadow:0 6px 16px rgba(245,158,11,.35);transition:box-shadow .15s,transform .12s}
+  .nav-reserve:hover{box-shadow:0 8px 22px rgba(245,158,11,.5)}
+  .nav-reserve:active{transform:scale(.97)}
+  .hamburger{display:none;background:none;border:none;padding:8px;cursor:pointer}
+  .hamburger svg{stroke:#fff}
+
+  /* ---------- Hero : photo entreprise, infos à gauche ---------- */
+  .hero{position:relative;min-height:92vh;display:flex;align-items:center;overflow:hidden;color:#fff;text-align:left}
+  .hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(7,18,33,.93) 0%,rgba(7,18,33,.82) 42%,rgba(7,18,33,.42) 100%)}
+  .hero-inner{position:relative;z-index:2;width:100%;max-width:1180px;margin:0 auto;padding:150px 24px 90px}
+  .hero-left{max-width:640px;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+  .hero-brand{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);backdrop-filter:blur(8px);border-radius:14px;padding:8px 20px 8px 9px}
+  .hero-brand .hb-ic{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--amber),#e07b00);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+  .hero-brand b{display:block;font-size:20px;font-weight:800;letter-spacing:.4px;color:#fff;line-height:1.15}
+  .hero-brand small{display:block;font-size:10.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#c3d0e2}
+  .hero-title{font-size:46px;line-height:1.12;font-weight:800;letter-spacing:-1px;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+  .hero-title span{color:var(--amber-h)}
+  .hero-sub{font-size:17px;line-height:1.65;color:#d3dde9;max-width:520px}
+  .hero-contact{display:flex;flex-direction:column;gap:10px;margin-top:6px;width:100%;max-width:520px}
+  .hero-contact .hc{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(6px);border-radius:13px;padding:10px 16px;font-size:14.5px;font-weight:600;color:#fff;text-decoration:none;transition:background .15s,border-color .15s}
+  .hero-contact a.hc:hover{background:rgba(245,158,11,.16);border-color:rgba(251,191,36,.5)}
+  .hero-contact .hc .hc-ic{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--amber),#e07b00);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+  .hero-contact .hc small{display:block;font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c3d0e2}
+  .hero-contact .hc b{font-size:20px;letter-spacing:.4px;font-weight:800;color:#fff;line-height:1.2}
+  .hero-contact .hc .hc-val{font-size:14.5px;font-weight:600;color:#fff;line-height:1.3;letter-spacing:0}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:none;border-radius:13px;padding:16px 34px;font-size:16px;font-weight:800;text-decoration:none;transition:transform .12s,box-shadow .15s,background .15s}
+  .btn:active{transform:scale(.97)}
+  .btn-amber{background:linear-gradient(135deg,var(--amber),#e07b00);color:#fff;box-shadow:0 12px 30px rgba(245,158,11,.45)}
+  .btn-amber:hover{box-shadow:0 14px 38px rgba(245,158,11,.6)}
+  .btn-ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.38);color:#fff}
+  .btn-ghost:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.6)}
+
+  /* ---------- Disponibilité temps réel (parc) ---------- */
+  .avail-summary{display:inline-flex;align-items:center;gap:10px;background:#e6f7f0;border:1.5px solid #b5e6d2;color:#0a6b4a;border-radius:999px;padding:11px 22px;font-size:14.5px;font-weight:700;margin-bottom:26px}
+  .avail-summary .as-dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(14,163,113,.18);animation:kping 2s ease-out infinite}
+
+  /* ---------- Zone de livraison ---------- */
+  .zone-strip{background:linear-gradient(152deg,#0b1a2e,#16304f);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .zone-strip .sec-head{margin-bottom:34px}
+  .zone-strip .sec-head h2{color:#fff}
+  .zone-strip .sec-head p{color:#b9c8dd}
+  .zone-strip .sec-head .kicker{color:var(--amber)}
+  .city-chips{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .city{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);color:#e8eef7;border-radius:999px;padding:11px 22px;font-size:15px;font-weight:700}
+  .city svg{color:var(--amber-h);flex-shrink:0}
+
+  /* ---------- Parc ---------- */
+  section{max-width:1180px;margin:0 auto;padding:84px 24px}
+  .sec-head{text-align:center;margin-bottom:48px}
+  .sec-head .kicker{color:var(--amber);font-weight:800;text-transform:uppercase;letter-spacing:2.5px;font-size:12.5px}
+  .sec-head h2{font-size:34px;font-weight:800;letter-spacing:-.6px;margin-top:10px;color:var(--navy)}
+  .sec-head p{color:var(--muted);margin-top:12px;max-width:620px;margin-left:auto;margin-right:auto;font-size:15.5px}
+  .price-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;max-width:760px;margin:30px auto 0}
+  .price-card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);text-align:left}
+  .price-card .pc-ic{width:44px;height:44px;border-radius:12px;background:var(--amber-soft);color:#b45309;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .price-card .pc-txt{flex:1;min-width:0}
+  .price-card .pc-txt b{display:block;font-size:15px;color:var(--navy)}
+  .price-card .pc-txt small{font-size:12px;color:var(--muted)}
+  .price-card .pc-prices{display:flex;gap:18px;align-items:center}
+  .price-card .pc-price{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+  .price-card .pc-price b{font-size:20px;color:#b45309;white-space:nowrap}
+  .price-card .pc-price small{font-size:11px;color:var(--muted);font-weight:600}
+  .sec-note{color:var(--muted);font-size:13px;margin-top:20px}
+  .veh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:24px}
+  .veh-card{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s}
+  .veh-card:hover{transform:translateY(-5px);box-shadow:0 18px 44px rgba(12,26,46,.16)}
+  .veh-art{display:flex;align-items:stretch;justify-content:center;min-height:150px;background:#0e2140}
+  .veh-art img{width:100%;height:152px;object-fit:cover;display:block}
+  .veh-back{font-size:12.5px;font-weight:700;color:#b45309;background:var(--amber-soft);border-radius:9px;padding:7px 11px;display:flex;align-items:center;gap:7px}
+  .veh-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .veh-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .veh-name{font-size:17.5px;font-weight:800;color:var(--navy)}
+  .veh-badge{font-size:12px;font-weight:800;padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .veh-badge.ok{background:#e6f7f0;color:var(--green)}
+  .veh-badge.no{background:#fdebec;color:var(--red)}
+  .veh-type{font-size:12.5px;color:var(--muted);text-transform:capitalize}
+  .veh-desc{font-size:13.5px;color:var(--muted);flex:1}
+  .veh-specs{display:flex;gap:16px;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:12px}
+  .veh-specs span{display:flex;align-items:center;gap:6px}
+  .veh-btn{margin-top:4px;background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:14px;transition:background .15s}
+  .veh-btn:hover{background:var(--navy-3)}
+  .veh-btn:disabled{background:#cbd5e1;cursor:not-allowed}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--navy);color:#93a5c0;margin-top:20px}
+  .foot-inner{max-width:1180px;margin:0 auto;padding:56px 24px 34px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px}
+  .foot-inner .logo{color:#fff;margin-bottom:16px}
+  .foot-inner h4{color:#fff;font-size:15px;margin-bottom:16px}
+  .foot-inner p{font-size:14px;line-height:1.7}
+  .foot-inner a{color:#93a5c0;display:block;font-size:14px;margin-bottom:10px;transition:color .15s}
+  .foot-inner a:hover{color:var(--amber-h)}
+  .foot-inner .f-link,.foot-inner .f-cond{display:flex;align-items:center;gap:9px}
+  .foot-inner .f-cond{margin-bottom:8px}
+  .foot-inner .f-link svg,.foot-inner .f-cond svg{flex-shrink:0}
+  .foot-phone{font-size:22px;font-weight:800;color:var(--amber-h);letter-spacing:.4px;display:flex;align-items:center;gap:10px}
+  .foot-bottom{border-top:1px solid rgba(255,255,255,.1);text-align:center;padding:18px;font-size:13px}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:960px){
+    .hero-inner{padding:130px 20px 70px}
+    .hero-title{font-size:38px}
+    .hero-sub{font-size:16px}
+    .hero-contact .hc b{font-size:18px}
+    section{padding:70px 20px}
+    .foot-inner{grid-template-columns:1fr 1fr;gap:30px}
+  }
+  @media (max-width:700px){
+    .nav-links{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(7,18,33,.97);backdrop-filter:blur(12px);flex-direction:column;justify-content:center;gap:10px;display:none;z-index:59}
+    .nav-links.open{display:flex}
+    .nav-links a{font-size:19px;padding:12px 0;text-align:center}
+    .nav-cta{flex-direction:column;gap:12px;margin-top:16px}
+    nav.scrolled .nav-links{background:rgba(255,255,255,.98)}
+    nav.scrolled .nav-links a{color:var(--navy)}
+    .hamburger{display:flex;margin-left:auto;z-index:61}
+    nav.scrolled .hamburger svg{stroke:var(--navy)}
+    .hero{min-height:86vh}
+    .hero-inner{padding:110px 18px 60px}
+    .hero-left{gap:15px}
+    .hero-title{font-size:29px}
+    .hero-brand b{font-size:17px}
+    .hero-contact .hc b{font-size:18px}
+    .hero-cta{flex-direction:column;width:100%;max-width:340px}
+    .hero-cta .btn{width:100%}
+    .btn{padding:15px 28px;font-size:15.5px}
+    section{padding:60px 16px}
+    .sec-head h2{font-size:26px}
+    .veh-grid{grid-template-columns:1fr}
+    .foot-inner{grid-template-columns:1fr;gap:26px}
+    .foot-phone{font-size:19px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#top">
+      <span class="logo-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+      </span>
+      TeryLivraison
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="#parc">Le parc</a>
+      <a href="#contact">Contact</a>
+      <div class="nav-cta">
+        
+          <a class="nav-login" href="login.html">Se connecter</a>
+          <a class="nav-reserve" href="tel:+14505028022">Cliquer pour réserver</a>
+        
+      </div>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ================= HERO (identité complète, infos à gauche) ================= -->
+<header class="hero" id="top">
+  <img class="hero-bg" src="static/company.jpg" alt="Flotte de véhicules TeryLivraison">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-brand">
+        <span class="hb-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+        </span>
+        <span><b>TeryLivraison</b></span>
+      </div>
+      <h1 class="hero-title">Livraison partout au <span>Québec</span></h1>
+      <p class="hero-sub">Camions et fourgonnettes disponibles en temps réel. Réservez en ligne en 2 minutes — paiement sur place.</p>
+      <div class="hero-contact">
+        <a class="hc" href="tel:+14505028022">
+          <span class="hc-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+          </span>
+          <span><small>Appelez-nous</small><b>+1 450 502-8022</b></span>
+        </a>
+        <span class="hc">
+          <span class="hc-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </span>
+          <span><small>Retrouvez-nous à</small><b class="hc-val">11/15 River 9 Ouest</b></span>
+        </span>
+        <a class="hc" href="mailto:contact@terylivraison.com">
+          <span class="hc-ic">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+          </span>
+          <span><small>Contactez-nous à</small><b class="hc-val">contact@terylivraison.com</b></span>
+        </a>
+      </div>
+      <div class="hero-cta">
+        <a class="btn btn-amber" href="tel:+14505028022">Cliquer pour réserver
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#parc">Voir le parc</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= PARC ================= -->
+<section id="parc">
+  <div class="sec-head">
+    <div class="kicker">Notre parc</div>
+    <h2>Choisissez votre véhicule</h2>
+    <p>Camions et fourgonnettes pour vos livraisons partout au Québec.</p>
+    <div class="price-grid">
+      <div class="price-card">
+        <span class="pc-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h12v7H1zM13 12h4l3 2.5V16h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg>
+        </span>
+        <div class="pc-txt">
+          <b>Petits véhicules</b>
+          <small>Fourgonnettes</small>
+        </div>
+        <div class="pc-prices">
+          <div class="pc-price"><b>70 $</b><small>/ 2 h</small></div>
+          <div class="pc-price"><b>140 $</b><small>/ jour</small></div>
+        </div>
+      </div>
+      <div class="price-card">
+        <span class="pc-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+        </span>
+        <div class="pc-txt">
+          <b>Camions cube</b>
+          <small>3,5 t à 5 t</small>
+        </div>
+        <div class="pc-prices">
+          <div class="pc-price"><b>100 $</b><small>/ 2 h</small></div>
+          <div class="pc-price"><b>350–400 $</b><small>/ jour</small></div>
+        </div>
+      </div>
+    </div>
+    <p class="sec-note">Les prix exacts s'affichent dans le formulaire de réservation.</p>
+    <div class="avail-summary" id="availSummary"><span class="as-dot"></span> <span class="as-dot"></span> 4 véhicules disponibles sur 5 aujourd'hui</div>
+  </div>
+  <div class="veh-grid" id="vehGrid"><div class="veh-card"><div class="veh-art"><img src="static/truck1.jpg" alt="" onerror="this.onerror=null;this.src='static/truck.svg'"></div><div class="veh-body"><div class="veh-top"><div class="veh-name">Camion 1</div><span class="veh-badge ok">● Disponible</span></div><div class="veh-type">camion</div><div class="veh-desc">Camion de livraison 3.5 t — idéal pour les meubles et gros volumes.</div><div class="veh-specs"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg> 3500 kg</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg> même carburant</span></div><a class="veh-btn" href="tel:+14505028022">Réserver ce véhicule</a></div></div><div class="veh-card"><div class="veh-art"><img src="static/truck2.jpg" alt="" onerror="this.onerror=null;this.src='static/truck.svg'"></div><div class="veh-body"><div class="veh-top"><div class="veh-name">Camion 2</div><span class="veh-badge ok">● Disponible</span></div><div class="veh-type">camion</div><div class="veh-desc">Camion de livraison 3.5 t — idéal pour les meubles et gros volumes.</div><div class="veh-specs"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg> 3500 kg</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg> même carburant</span></div><a class="veh-btn" href="tel:+14505028022">Réserver ce véhicule</a></div></div><div class="veh-card"><div class="veh-art"><img src="static/truck3.jpg" alt="" onerror="this.onerror=null;this.src='static/truck.svg'"></div><div class="veh-body"><div class="veh-top"><div class="veh-name">Camion 3</div><span class="veh-badge ok">● Disponible</span></div><div class="veh-type">camion</div><div class="veh-desc">Grand camion 5 t — pour les chargements lourds.</div><div class="veh-specs"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg> 5000 kg</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg> même carburant</span></div><a class="veh-btn" href="tel:+14505028022">Réserver ce véhicule</a></div></div><div class="veh-card"><div class="veh-art"><img src="static/van1.jpg" alt="" onerror="this.onerror=null;this.src='static/van.svg'"></div><div class="veh-body"><div class="veh-top"><div class="veh-name">Fourgonnette 1</div><span class="veh-badge no">● Déjà pris</span></div><div class="veh-type">fourgonnette</div><div class="veh-desc">Fourgonnette — parfaite pour les électros et petites livraisons.</div><div class="veh-back"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Sera dispo le 2026-08-20</div><div class="veh-specs"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg> 1200 kg</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg> même carburant</span></div><button class="veh-btn" disabled>Indisponible aujourd'hui</button></div></div><div class="veh-card"><div class="veh-art"><img src="static/van2.jpg" alt="" onerror="this.onerror=null;this.src='static/van.svg'"></div><div class="veh-body"><div class="veh-top"><div class="veh-name">Fourgonnette 2</div><span class="veh-badge ok">● Disponible</span></div><div class="veh-type">fourgonnette</div><div class="veh-desc">Fourgonnette — parfaite pour les électros et petites livraisons.</div><div class="veh-specs"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg> 1200 kg</span><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg> même carburant</span></div><a class="veh-btn" href="tel:+14505028022">Réserver ce véhicule</a></div></div></div>
+</section>
+
+<!-- ================= ZONE DE LIVRAISON ================= -->
+<section id="zone" class="zone-strip">
+  <div class="sec-head">
+    <div class="kicker">Zone de livraison</div>
+    <h2>Partout au Québec</h2>
+    <p>TeryLivraison livre dans toute la province du Québec, notamment :</p>
+  </div>
+  <div class="city-chips">
+    <span class="city"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Québec</span>
+    <span class="city"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Montréal</span>
+    <span class="city"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Trois-Rivières</span>
+    <span class="city"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Sherbrooke</span>
+    <span class="city"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Granby</span>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer id="contact">
+  <div class="foot-inner">
+    <div>
+      <a class="logo" href="#top">
+        <span class="logo-badge">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+        </span>
+        TeryLivraison
+      </a>
+      <p>Location de camions et fourgonnettes pour vos livraisons partout au Québec — Québec, Montréal, Trois-Rivières, Sherbrooke, Granby. Réservez en ligne, payez sur place.</p>
+      <a class="foot-phone f-link" href="tel:+14505028022">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+        +1 450 502-8022
+      </a>
+      <a class="f-link" href="mailto:contact@terylivraison.com">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+        contact@terylivraison.com
+      </a>
+      <a class="f-link" href="#top">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        11/15 River 9 Ouest
+      </a>
+    </div>
+    <div>
+      <h4>Services</h4>
+      <a class="f-link" href="#parc">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+        Réservation de camions
+      </a>
+      <a class="f-link" href="#parc">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h12v7H1zM13 12h4l3 2.5V16h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg>
+        Fourgonnettes
+      </a>
+      <a class="f-link" href="tel:+14505028022">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>
+        Livraison partout au Québec
+      </a>
+    </div>
+    <div>
+      <h4>Paiement &amp; conditions</h4>
+      <p class="f-cond">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Carte de crédit ·
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M3 8l9-5 9 5"/></svg>
+        Virement ·
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>
+        Espèces
+      </p>
+      <p class="f-cond">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg>
+        Rendre le véhicule avec le même niveau de carburant qu'au départ
+      </p>
+      <p class="f-cond">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        En cas d'accident, le client est responsable des réparations
+      </p>
+      <p class="f-cond">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>
+        Chauffeur / main d'œuvre : prix à discuter par téléphone
+      </p>
+    </div>
+  </div>
+  <div class="foot-bottom">© 2026 TeryLivraison — Location de véhicules de livraison · Québec, Canada</div>
+</footer>
+
+<!-- ================= WIDGETS ================= -->
+<!-- ================= WIDGETS : CHAT + APPEL (partagé) ================= -->
+<style>
+  .chat-fab{position:fixed;right:22px;bottom:22px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#e07b00);color:#fff;border:none;box-shadow:0 10px 26px rgba(245,158,11,.45);display:flex;align-items:center;justify-content:center;z-index:90;transition:transform .15s}
+  .chat-fab:hover{transform:scale(1.07)}
+  .chat-fab .ping{position:absolute;inset:0;border-radius:50%;border:2px solid #f59e0b;animation:kping 2s ease-out infinite}
+  @keyframes kping{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.45);opacity:0}}
+  .chat-panel{position:fixed;right:22px;bottom:94px;width:370px;height:520px;max-height:calc(100vh - 120px);background:#fff;border-radius:18px;box-shadow:0 20px 50px rgba(12,26,46,.25);display:flex;flex-direction:column;z-index:91;overflow:hidden;transform-origin:bottom right;transition:transform .18s ease,opacity .18s ease}
+  .chat-panel.closed{transform:scale(.6);opacity:0;pointer-events:none}
+  .chat-head{background:#0c1a2e;color:#fff;padding:15px 18px;display:flex;align-items:center;gap:12px}
+  .chat-head .avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#e07b00);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
+  .chat-head b{font-size:15px;display:block}
+  .chat-head small{font-size:12px;color:#8fa3c2;display:flex;align-items:center;gap:5px}
+  .chat-head .online{width:8px;height:8px;border-radius:50%;background:#0ea371}
+  .chat-msgs{flex:1;overflow-y:auto;padding:18px;background:#f7f9fc;display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:85%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .msg.bot{background:#fff;border:1px solid #e3e9f2;border-bottom-left-radius:4px;align-self:flex-start;color:#16233a}
+  .msg.user{background:#0c1a2e;color:#fff;border-bottom-right-radius:4px;align-self:flex-end}
+  .msg.typing{display:flex;gap:5px;align-items:center;padding:14px}
+  .msg.typing i{width:7px;height:7px;border-radius:50%;background:#94a3b8;animation:kblink 1.2s infinite}
+  .msg.typing i:nth-child(2){animation-delay:.2s}
+  .msg.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes kblink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+  .chat-chips{display:flex;gap:8px;padding:0 14px 10px;flex-wrap:wrap;background:#f7f9fc}
+  .chat-chips button{border:1px solid #e3e9f2;background:#fff;color:#0c1a2e;border-radius:999px;font-size:12.5px;font-weight:600;padding:7px 12px;cursor:pointer;transition:all .15s}
+  .chat-chips button:hover{border-color:#f59e0b;color:#92400e;background:#fdf3e0}
+  .chat-input{display:flex;gap:10px;padding:12px 14px;border-top:1px solid #e3e9f2;background:#fff}
+  .chat-input input{flex:1;border:1.5px solid #e3e9f2;border-radius:999px;padding:11px 16px;font-size:14px;font-family:inherit;outline:none}
+  .chat-input input:focus{border-color:#f59e0b}
+  .chat-input button{width:44px;height:44px;border-radius:50%;background:#0c1a2e;color:#fff;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+  .chat-input button:disabled{background:#cbd5e1}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:none;border-radius:12px;padding:14px 26px;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s,background .15s}
+  .btn:active{transform:scale(.98)}
+  .btn-amber{background:linear-gradient(135deg,#f59e0b,#e07b00);color:#fff;box-shadow:0 8px 20px rgba(245,158,11,.35)}
+  .btn-amber:hover{box-shadow:0 10px 26px rgba(245,158,11,.5)}
+
+  @media (max-width:700px){
+    .chat-panel{right:10px;left:10px;bottom:88px;width:auto;height:min(560px,calc(100vh - 110px))}
+    .chat-fab{right:16px;bottom:16px}
+  }
+</style>
+
+<!-- chat désactivé : aperçu statique (backend absent) -->
+<script>
+/* ===== Sons (Web Audio — aucun fichier externe) ===== */
+var kAudio = null;
+function kBeep(freq, dur, delay, type){
+  try{
+    if(!kAudio){ kAudio = new (window.AudioContext || window.webkitAudioContext)(); }
+    if(kAudio.state === 'suspended'){ kAudio.resume(); }
+    var t = kAudio.currentTime + (delay || 0);
+    var o = kAudio.createOscillator();
+    var g = kAudio.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.2, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(kAudio.destination);
+    o.start(t); o.stop(t + dur + 0.05);
+  }catch(e){}
+}
+function soundSend(){ kBeep(880, 0.12, 0, 'sine'); }
+function soundReceive(){ kBeep(660, 0.1, 0, 'sine'); kBeep(990, 0.16, 0.11, 'sine'); }
+
+/* ===== Chat ===== */
+var PHONE = "+1 450 502-8022";
+var chatSessionId = localStorage.getItem('terylivraison_chat_session') || '';
+var chatOpened = false;
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ===== Icônes SVG (lucide-style, partagées) ===== */
+var ICONS = {
+  clock:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  scale:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M12 3l5 5M12 3l-5 5"/><path d="M7 8h10"/></svg>',
+  fuel:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M13 10h3a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M5 13h8"/></svg>',
+  phone:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>',
+  mail:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>',
+  truck:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h13v9H1zM14 11h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>',
+  van:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 9h12v7H1zM13 12h4l3 2.5V16h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/></svg>',
+  package:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>',
+  card:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  bank:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M3 8l9-5 9 5"/></svg>',
+  cash:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>',
+  warn:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  worker:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>',
+  sofa:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0Z"/><path d="M4 18v2M20 18v2"/></svg>',
+  tv:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="m17 2-5 5-5-5"/></svg>',
+  timer:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></svg>',
+  calendar:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  car:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H8.5c-.7 0-1.3.3-1.8.7L4.5 10s-2.7.6-4.5 1.1c-.8.2-1.5 1-1.5 1.9v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>',
+  pin:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  cross:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  pending:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  user:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  info:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 12v4"/></svg>',
+  clipboard:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>',
+  arrow:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>'
+};
+function ic(n, s){
+  var i = ICONS[n] || '';
+  if(i && s){ i = i.replace('width="15"','width="'+s+'"').replace('height="15"','height="'+s+'"'); }
+  return i;
+}
+
+function toggleChat(skipFocus){
+  var p = document.getElementById('chatPanel');
+  chatOpened = !chatOpened;
+  p.classList.toggle('closed', !chatOpened);
+  if(chatOpened && !document.getElementById('chatMsgs').children.length){
+    addMsg('bot','Bonjour ! Je suis l\'assistant TeryLivraison. Je connais la disponibilité des véhicules et je peux vous guider pas à pas pour remplir votre réservation — ou vous aider à réserver par téléphone au ' + PHONE + '. Comment puis-je vous aider ?');
+  }
+  if(chatOpened && !skipFocus){ document.getElementById('chatInput').focus(); }
+}
+function openChat(){ if(!chatOpened){ toggleChat(); } }
+function autoOpenChat(delay){
+  setTimeout(function(){
+    if(!chatOpened){ toggleChat(true); }
+  }, delay || 5000);
+}
+
+function addMsg(role, text){
+  var m = document.getElementById('chatMsgs');
+  var div = document.createElement('div');
+  div.className = 'msg '+role;
+  div.innerHTML = esc(text).replace(/\n/g,'<br>');
+  m.appendChild(div);
+  m.scrollTop = m.scrollHeight;
+  return div;
+}
+
+function askBot(q){
+  document.getElementById('chatInput').value = q;
+  sendChat();
+}
+
+function sendChat(){
+  var input = document.getElementById('chatInput');
+  var text = input.value.trim();
+  if(!text){ return; }
+  input.value = '';
+  addMsg('user', text);
+
+  var typing = document.createElement('div');
+  typing.className = 'msg bot typing';
+  typing.innerHTML = '<i></i><i></i><i></i>';
+  document.getElementById('chatMsgs').appendChild(typing);
+  document.getElementById('chatMsgs').scrollTop = document.getElementById('chatMsgs').scrollHeight;
+
+  var btn = document.getElementById('chatSend');
+  btn.disabled = true;
+  soundSend();
+
+  fetch('/api/chat', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({message:text, session_id:chatSessionId})
+  })
+  .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
+  .then(function(res){
+    typing.remove();
+    btn.disabled = false;
+    if(res.ok && res.data.reply){
+      chatSessionId = res.data.session_id || chatSessionId;
+      localStorage.setItem('terylivraison_chat_session', chatSessionId);
+      addMsg('bot', res.data.reply);
+      soundReceive();
+    } else {
+      addMsg('bot',(res.data.error || 'Le service est momentanément indisponible. Réessayez ou appelez-nous directement au ' + PHONE + '.'));
+    }
+  })
+  .catch(function(){
+    typing.remove();
+    btn.disabled = false;
+    addMsg('bot','Problème de connexion. Réessayez ou appelez-nous directement au ' + PHONE + '.');
+  });
+}
+</script>
+
+<script>
+var IS_LOGGED = false;
+
+function vehImg(v){
+  var fb = v.type === 'camion' ? 'static/truck.svg' : 'static/van.svg';
+  return '<img src="'+esc(v.image || fb)+'" alt="'+esc(v.name)+'" onerror="this.onerror=null;this.src=\''+fb+'\'">';
+}
+
+function loadParc(){
+  var start = new Date().toISOString().slice(0,10);
+  fetch('/api/vehicles?start='+start+'&end='+start)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var grid = document.getElementById('vehGrid');
+      var avail = data.vehicles.filter(function(v){ return v.available; }).length;
+      var total = data.vehicles.length;
+      var sum = document.getElementById('availSummary');
+      if(avail === 0){
+        sum.innerHTML = '<span class="as-dot"></span> Tous les véhicules sont pris aujourd\'hui — revenez plus tard ou appelez-nous';
+      } else {
+        sum.innerHTML = '<span class="as-dot"></span> ' + avail + ' véhicule' + (avail > 1 ? 's' : '') + ' disponible' + (avail > 1 ? 's' : '') + ' sur ' + total + ' aujourd\'hui';
+      }
+      var html = '';
+      data.vehicles.forEach(function(v){
+        var badge = v.available
+          ? '<span class="veh-badge ok">● Disponible</span>'
+          : '<span class="veh-badge no">● Déjà pris</span>';
+        var back = v.available
+          ? ''
+          : '<div class="veh-back">'+ic('clock')+' Sera dispo le '+(v.next_available||'?')+'</div>';
+        var btn = v.available
+          ? '<button class="veh-btn" onclick="goReserve()">Réserver ce véhicule</button>'
+          : '<button class="veh-btn" disabled>Indisponible aujourd\'hui</button>';
+        html +=
+          '<div class="veh-card">'+
+            '<div class="veh-art">'+vehImg(v)+'</div>'+
+            '<div class="veh-body">'+
+              '<div class="veh-top"><div class="veh-name">'+esc(v.name)+'</div>'+badge+'</div>'+
+              '<div class="veh-type">'+esc(v.type)+'</div>'+
+              '<div class="veh-desc">'+esc(v.description)+'</div>'+
+              back+
+              '<div class="veh-specs">'+
+                '<span>'+ic('scale')+' '+v.capacity_kg+' kg</span>'+
+                '<span>'+ic('fuel')+' même carburant</span>'+
+              '</div>'+
+              btn+
+            '</div>'+
+          '</div>';
+      });
+      grid.innerHTML = html;
+    })
+    .catch(function(){ grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--muted)">Impossible de charger le parc. Réessayez.</p>'; });
+}
+
+function goReserve(){
+  window.location.href = IS_LOGGED ? '/reserver' : '/login?next=/reserver';
+}
+
+/* Nav scroll */
+var nav = document.getElementById('nav');
+function onScroll(){ nav.classList.toggle('scrolled', window.scrollY > 40); }
+window.addEventListener('scroll', onScroll);
+onScroll();
+
+/* Menu mobile */
+function toggleMenu(){ document.getElementById('navLinks').classList.toggle('open'); }
+document.getElementById('navLinks').addEventListener('click', function(e){
+  if(e.target.tagName === 'A' && window.innerWidth < 700){ this.classList.remove('open'); }
+});
+
+</script>
+</body>
+</html>
