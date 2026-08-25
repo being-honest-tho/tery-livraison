@@ -169,7 +169,7 @@
     <div class="veh-pick" id="vehPick"><!-- cartes injectées par JS --></div>
     <div class="field full">
       <select id="vehicle_id" name="vehicle_id" required onchange="onVehicleChange()" style="display:none"></select>
-      <span class="hint" id="vehHint" style="font-size:12px;color:var(--muted)">Les véhicules déjà pris pour vos dates sont grisés.</span>
+      <span class="hint" id="vehHint" style="font-size:12px;color:var(--muted)">Les véhicules occupés pour vos dates sont grisés.</span>
     </div>
     <div class="field">
       <label for="start_date">Date de début <span class="req">*</span></label>
@@ -283,12 +283,12 @@
       <label>Comment récupérez-vous le véhicule ? <span class="req">*</span></label>
       <div class="chips">
         <label class="chip"><input type="radio" name="rental_mode" value="self" checked onchange="onModeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H8.5c-.7 0-1.3.3-1.8.7L4.5 10s-2.7.6-4.5 1.1c-.8.2-1.5 1-1.5 1.9v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>Je viens chercher le véhicule moi-même</span></label>
-        <label class="chip"><input type="radio" name="rental_mode" value="driver" onchange="onModeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>Chauffeur / main d'œuvre <b style="color:#b45309">(frais additionnels)</b></span></label>
+        <label class="chip"><input type="radio" name="rental_mode" value="driver" onchange="onModeChange()"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>Chauffeur / main d'œuvre</span></label>
       </div>
     </div>
     <div class="note driver" id="driverNote">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
-      <span><b>Chauffeur / main d'œuvre : frais additionnels.</b> Le prix se discute par téléphone avec notre équipe au <b>{{ company_phone }}</b> — appelez-nous pour en parler.</span>
+      <span><b>Chauffeur / main d'œuvre : à discuter.</b> Appelez notre équipe au <b>{{ company_phone }}</b> pour en parler.</span>
     </div>
 
     <div class="form-section-title"><span class="n">6</span> Paiement</div>
@@ -300,11 +300,6 @@
         <label class="chip"><input type="radio" name="payment_method" value="cash" checked><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg>Espèces</span></label>
       </div>
     </div>
-    <div class="note blue">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-      <span><b>Paiement sur place :</b> carte de crédit, virement bancaire ou espèces. Après la réservation, appelez-nous au <b>{{ company_phone }}</b> pour confirmer.</span>
-    </div>
-
     <div class="weight-warn" id="weightWarn"></div>
 
     <label class="agree">
@@ -391,7 +386,7 @@ function renderPick(){
     var fb = v.type === 'camion' ? '/static/truck.svg' : '/static/van.svg';
     var badge = v.available
       ? '<span class="vp-badge ok">Dispo</span>'
-      : '<span class="vp-badge no">Déjà pris</span>';
+      : '<span class="vp-badge no">Occupé</span>';
     var back = v.available
       ? ''
       : '<div class="vp-back">'+ic('clock')+' Sera dispo le '+(v.next_available||'?')+'</div>';
@@ -413,7 +408,7 @@ function renderSelect(){
   var html = '<option value="" disabled selected>Sélectionnez un véhicule…</option>';
   vehicles.forEach(function(v){
     var label = v.name+' ('+v.capacity_kg+' kg)';
-    html += '<option value="'+v.id+'"'+(v.available?'':' disabled')+'>'+esc(label)+(v.available?'':' (pris)')+'</option>';
+    html += '<option value="'+v.id+'"'+(v.available?'':' disabled')+'>'+esc(label)+(v.available?'':' (occupé)')+'</option>';
   });
   sel.innerHTML = html;
   if(selectedVehicleId){ sel.value = selectedVehicleId; }
@@ -439,7 +434,7 @@ function onVehicleChange(){
     return;
   }
   if(!v.available){
-    setTotal('—','Ce véhicule est déjà pris pour ces dates');
+    setTotal('—','Ce véhicule est occupé pour ces dates');
     submitBtn.disabled = true;
     return;
   }

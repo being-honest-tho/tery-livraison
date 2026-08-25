@@ -27,6 +27,26 @@ DB_PATH = os.path.join(BASE_DIR, "delivery.db")
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 PORT = int(os.environ.get("PORT", "8777"))
 
+
+def _load_local_env():
+    """Charge <app_dir>/.env (KEY=VALUE, secrets SMTP etc.) sans écraser les
+    variables d'environnement déjà définies. Ne loggue jamais les valeurs."""
+    env_path = os.path.join(BASE_DIR, ".env")
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, _, v = line.partition("=")
+            k, v = k.strip(), v.strip().strip('"').strip("'")
+            if k and k not in os.environ:
+                os.environ[k] = v
+
+
+_load_local_env()
+
 DEFAULT_CONFIG = {
     "secret_key": "",
     "admin_url": "http://127.0.0.1:8778",
@@ -54,35 +74,48 @@ VEHICLE_IMAGES = {
 COMPANY_NAME = "TeryLivraison"
 COMPANY_PHONE = "+1 450 502-8022"      # numéro d'appel affiché sur le site
 COMPANY_PHONE_TEL = "+14505028022"
-COMPANY_WHATSAPP = "+86 183 3438 0599"  # WhatsApp (notifications admin + affiché vitrine)
-COMPANY_WHATSAPP_WA = "8618334380599"   # wa.me sans "+"
-COMPANY_ADDRESS = "11/15 River 9 Ouest"
+COMPANY_PHONE_2 = "+1 514 549-4473"    # second numéro d'appel affiché sur le site
+COMPANY_PHONE_TEL_2 = "+15145494473"
+COMPANY_ADDRESS = "1115 rue Villeneuve ouest"
 COMPANY_EMAIL = "contact@terylivraison.com"
 PRICE_2H = 70.0          # petit véhicule — location 2 heures (fallback)
 PRICE_DAY = 140.0        # petit véhicule — journée complète (fallback)
 PAYMENT_LABELS = {"credit_card": "Carte de crédit", "transfer": "Virement bancaire", "cash": "Espèces"}
 DURATION_LABELS = {"2h": "2 heures", "journee": "Journée complète"}
-ADMIN_WHATSAPP = "+8618334380599"          # WhatsApp de l'admin (reçoit les réservations)
-WHATSAPP_LOG = os.path.join(BASE_DIR, "whatsapp_notif.log")
+EMAIL_LOG = os.path.join(BASE_DIR, "email_notif.log")
 
 
-def notify_admin_whatsapp(booking_id, lines):
-    """Envoie le récap de réservation sur le WhatsApp de l'admin via Hermes
-    (`hermes send`, bridge WhatsApp natif). Ne bloque jamais la réservation."""
-    if os.environ.get("WHATSAPP_ENABLED", "").lower() != "true":
+def notify_admin_email(booking_id, lines):
+    """Envoie le récap de réservation par email (SMTP QQ) à l'admin.
+    Actif si EMAIL_ENABLED=true + EMAIL_SMTP_PASS (dans ~/.hermes/.env).
+    Ne bloque jamais la réservation (thread daemon + timeout)."""
+    if os.environ.get("EMAIL_ENABLED", "").lower() != "true":
         return
-    msg = "🚚 *Nouvelle réservation TeryLivraison* #{}\n{}".format(booking_id, "\n".join(lines))
+    host = os.environ.get("EMAIL_SMTP_HOST", "smtp.qq.com")
+    port = int(os.environ.get("EMAIL_SMTP_PORT", "465"))
+    user = os.environ.get("EMAIL_SMTP_USER", "robertomaliro@qq.com")
+    pwd = os.environ.get("EMAIL_SMTP_PASS", "")
+    to = os.environ.get("EMAIL_TO", "robertomaliro@qq.com")
+    if not pwd:
+        with open(EMAIL_LOG, "a", encoding="utf-8") as f:
+            f.write("[{}] CONFIG manquante (EMAIL_SMTP_PASS)\n".format(datetime.now().isoformat()))
+        return
+    subject = "🚚 Nouvelle réservation TeryLivraison #{}".format(booking_id)
     try:
-        r = subprocess.run(
-            ["hermes", "send", "--to", "whatsapp:" + ADMIN_WHATSAPP, msg],
-            capture_output=True, text=True, timeout=90,
-        )
-        with open(WHATSAPP_LOG, "a", encoding="utf-8") as f:
-            f.write("[{}] rc={} out={} err={}\n".format(
-                datetime.now().isoformat(), r.returncode,
-                (r.stdout or "").strip()[:300], (r.stderr or "").strip()[:300]))
+        import smtplib
+        from email.message import EmailMessage
+        m = EmailMessage()
+        m["From"] = user
+        m["To"] = to
+        m["Subject"] = subject
+        m.set_content("\n".join(lines))
+        with smtplib.SMTP_SSL(host, port, timeout=30) as s:
+            s.login(user, pwd)
+            s.send_message(m)
+        with open(EMAIL_LOG, "a", encoding="utf-8") as f:
+            f.write("[{}] OK envoyé à {}\n".format(datetime.now().isoformat(), to))
     except Exception as e:
-        with open(WHATSAPP_LOG, "a", encoding="utf-8") as f:
+        with open(EMAIL_LOG, "a", encoding="utf-8") as f:
             f.write("[{}] EXC {}\n".format(datetime.now().isoformat(), e))
 
 
@@ -321,8 +354,8 @@ def base_ctx():
         "company_name": COMPANY_NAME,
         "company_phone": COMPANY_PHONE,
         "company_phone_tel": COMPANY_PHONE_TEL,
-        "company_whatsapp": COMPANY_WHATSAPP,
-        "company_whatsapp_wa": COMPANY_WHATSAPP_WA,
+        "company_phone_2": COMPANY_PHONE_2,
+        "company_phone_tel_2": COMPANY_PHONE_TEL_2,
         "company_address": COMPANY_ADDRESS,
         "company_email": COMPANY_EMAIL,
     }
@@ -525,7 +558,7 @@ def api_booking():
     db.commit()
     booking_id = cur.lastrowid
 
-    # Notification WhatsApp de l'admin (en arrière-plan, jamais bloquant)
+    # Notification email de l'admin (en arrière-plan, jamais bloquant)
     lines = [
         "👤 {} ({})".format(full_name, phone),
         "📧 {}".format(email or "non renseigné"),
@@ -541,7 +574,7 @@ def api_booking():
         lines.append("👷 Chauffeur / main d'œuvre : OUI (prix par téléphone)")
     lines.append("💳 Paiement : {} (sur place)".format(PAYMENT_LABELS.get(payment_method, payment_method)))
     lines.append("💰 Total : {} $".format(total))
-    threading.Thread(target=notify_admin_whatsapp, args=(booking_id, lines), daemon=True).start()
+    threading.Thread(target=notify_admin_email, args=(booking_id, lines), daemon=True).start()
 
     return jsonify({
         "ok": True,
@@ -628,7 +661,7 @@ def build_system_prompt():
                 v["name"], v["type"], v["capacity_kg"], p2h, pday))
         else:
             nxt = vehicle_next_available(v["id"], today, today)
-            lines.append("- {} ({}): PRIS aujourd'hui, sera dispo le {}, capacité {} kg — {} $/2 h, {} $/jour".format(
+            lines.append("- {} ({}): occupé aujourd'hui, sera dispo le {}, capacité {} kg — {} $/2 h, {} $/jour".format(
                 v["name"], v["type"], nxt or "?", v["capacity_kg"], p2h, pday))
     availability = "\n".join(lines)
     return (
@@ -651,22 +684,22 @@ def build_system_prompt():
         "  4. Livraison & distance : adresse de départ (où le client est) et destination. La distance se calcule "
         "automatiquement (GPS).\n"
         "  5. Chauffeur ou main d'œuvre : le client peut venir chercher le véhicule lui-même ou cocher l'option "
-        "chauffeur/main d'œuvre (frais additionnels, prix discuté par téléphone au {phone}).\n"
+        "chauffeur/main d'œuvre (prix à discuter par téléphone au {phone}).\n"
         "  6. Paiement : la méthode de paiement : carte de crédit, virement bancaire ou espèces (paiement sur place). Il faut aussi "
         "accepter les 2 conditions : rendre le véhicule avec le même niveau de carburant qu'au départ, et être "
         "responsable des réparations en cas d'accident.\n"
         "- Pour accéder au formulaire, le client entre son nom et son numéro de téléphone sur la page de connexion "
         "(email optionnel) — pas de mot de passe.\n"
         "- RÉSERVATION PAR TÉLÉPHONE : si le client veut réserver par téléphone, réponds-lui textuellement : "
-        "« Passez votre réservation par téléphone : appelez le {phone}. Notre équipe prend votre réservation et vous "
+        "« Passez votre réservation par téléphone : appelez le {phone} ou le {phone2}. Notre équipe prend votre réservation et vous "
         "confirme le prix. » Tu peux aussi lui rappeler qu'il peut réserver en ligne via le formulaire.\n"
         "- Le colis (le chargement) peut être des meubles, des électros, etc. Le poids du colis ne doit pas "
         "dépasser la capacité du véhicule.\n"
         "- Le site calcule la distance entre l'adresse de départ et la destination (GPS).\n"
         "- Disponibilités d'aujourd'hui ({}) :\n{}\n"
         "Réponds en français, de façon courte et utile. Guide le client étape par étape quand il demande de l'aide "
-        "pour réserver. Propose le téléphone ({phone}) pour le chauffeur ou la confirmation."
-        .format(today, availability, phone=COMPANY_PHONE, address=COMPANY_ADDRESS, email=COMPANY_EMAIL)
+        "pour réserver. Propose le téléphone ({phone} ou {phone2}) pour le chauffeur ou la confirmation."
+        .format(today, availability, phone=COMPANY_PHONE, phone2=COMPANY_PHONE_2, address=COMPANY_ADDRESS, email=COMPANY_EMAIL)
     )
 
 

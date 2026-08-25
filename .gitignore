@@ -1,5 +1,6 @@
 # Secrets & config locale
 config.json
+.env
 
 # Base de données (données clients — ne jamais publier)
 delivery.db

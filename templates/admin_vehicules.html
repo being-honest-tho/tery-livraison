@@ -49,7 +49,7 @@
           <td>{{ '%.0f'|format(v.price_2h) }} $</td>
           <td>{{ '%.0f'|format(v.price_day) }} $</td>
           <td>{{ v.capacity_kg }} kg</td>
-          <td><span class="badge {{ 'validated' if v.available else 'pending' }}">{{ 'Disponible' if v.available else 'Pris' }}</span></td>
+          <td><span class="badge {{ 'validated' if v.available else 'pending' }}">{{ 'Disponible' if v.available else 'Occupé' }}</span></td>
         </tr>
         {% endfor %}
       </table>
