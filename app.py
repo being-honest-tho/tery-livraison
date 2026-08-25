@@ -174,6 +174,8 @@ def init_db():
             name TEXT NOT NULL,
             type TEXT NOT NULL,
             price_per_day REAL NOT NULL,
+            price_2h REAL DEFAULT 70.0,
+            price_day REAL DEFAULT 140.0,
             capacity_kg INTEGER NOT NULL,
             description TEXT DEFAULT '',
             image TEXT DEFAULT '',
@@ -254,17 +256,8 @@ def init_db():
     vcols = [r[1] for r in db.execute("PRAGMA table_info(vehicles)")]
     if "image" not in vcols:
         db.execute("ALTER TABLE vehicles ADD COLUMN image TEXT DEFAULT ''")
-    # véhicules
-    n = db.execute("SELECT COUNT(*) FROM vehicles").fetchone()[0]
-    if n == 0:
-        db.executemany(
-            "INSERT INTO vehicles (name, type, price_per_day, price_2h, price_day, capacity_kg, description) VALUES (:name, :type, :price_per_day, :price_2h, :price_day, :capacity_kg, :description)",
-            VEHICLES_SEED,
-        )
-    # images par défaut (fichiers locaux stables)
-    for name, url in VEHICLE_IMAGES.items():
-        db.execute("UPDATE vehicles SET image = ? WHERE name = ?", (url, name))
     # tarifs par type de véhicule (petits 70/140 ; camions cube 100/350-400)
+    # → AVANT le seed : une base neuve (Render) n'a pas encore ces colonnes
     vcols = [r[1] for r in db.execute("PRAGMA table_info(vehicles)")]
     added_prices = False
     if "price_2h" not in vcols:
@@ -283,6 +276,16 @@ def init_db():
         db.execute("UPDATE vehicles SET price_2h = 70.0, price_day = 140.0 WHERE type = 'fourgonnette'")
         db.execute("UPDATE vehicles SET price_2h = 100.0, price_day = 400.0 WHERE type = 'camion' AND capacity_kg >= 5000")
         db.execute("UPDATE vehicles SET price_2h = 100.0, price_day = 350.0 WHERE type = 'camion' AND capacity_kg < 5000")
+    # véhicules
+    n = db.execute("SELECT COUNT(*) FROM vehicles").fetchone()[0]
+    if n == 0:
+        db.executemany(
+            "INSERT INTO vehicles (name, type, price_per_day, price_2h, price_day, capacity_kg, description) VALUES (:name, :type, :price_per_day, :price_2h, :price_day, :capacity_kg, :description)",
+            VEHICLES_SEED,
+        )
+    # images par défaut (fichiers locaux stables)
+    for name, url in VEHICLE_IMAGES.items():
+        db.execute("UPDATE vehicles SET image = ? WHERE name = ?", (url, name))
     # admin par défaut
     n = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     if n == 0:
