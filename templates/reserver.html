@@ -130,6 +130,7 @@
   @media (max-width:700px){
     .form-grid{grid-template-columns:1fr}
     .veh-pick{grid-template-columns:1fr}
+    .vp-card img{height:200px}
     section{padding:56px 18px}
   }
   @media (max-width:480px){
@@ -198,8 +199,8 @@
 
     <div class="form-section-title"><span class="n">2</span> Identité &amp; permis</div>
     <div class="field">
-      <label for="full_name">Nom complet <span class="req">*</span></label>
-      <input type="text" id="full_name" name="full_name" placeholder="Ex : Jean Tremblay" required>
+      <label for="full_name">Prénom <span class="req">*</span></label>
+      <input type="text" id="full_name" name="full_name" placeholder="Ex : Jean" required>
     </div>
     <div class="field">
       <label for="phone">Téléphone <span class="req">*</span></label>
@@ -288,7 +289,7 @@
     </div>
     <div class="note driver" id="driverNote">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.13.96.36 1.9.7 2.8a2 2 0 0 1-.45 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.45c.9.34 1.84.57 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
-      <span><b>Chauffeur / main d'œuvre : à discuter.</b> Appelez notre équipe au <b>{{ company_phone }}</b> pour en parler.</span>
+      <span><b>Chauffeur / main d'œuvre : à discuter.</b> Appelez notre équipe au <b>{{ company_phone }}</b> ou au <b>{{ company_phone_2 }}</b> pour en parler.</span>
     </div>
 
     <div class="form-section-title"><span class="n">6</span> Paiement</div>
@@ -350,6 +351,9 @@
 <!-- ================= WIDGETS ================= -->
 {% include '_widgets.html' %}
 
+<!-- ================= LIGHTBOX APERÇU PHOTOS ================= -->
+{% include '_lightbox.html' %}
+
 <script>
 /* ================= State ================= */
 var vehicles = [];
@@ -379,6 +383,13 @@ function loadVehicles(){
 
 function priceStr(p){ return p.toFixed(2).replace(/\.00$/,''); }
 
+function showVehPreview(id){
+  var v = null;
+  for(var k = 0; k < vehicles.length; k++){ if(vehicles[k].id === id){ v = vehicles[k]; break; } }
+  if(!v || !v.image) return;
+  openLightbox([v.image], v.name);
+}
+
 function renderPick(){
   var grid = document.getElementById('vehPick');
   var html = '';
@@ -390,10 +401,15 @@ function renderPick(){
     var back = v.available
       ? ''
       : '<div class="vp-back">'+ic('clock')+' Sera dispo le '+(v.next_available||'?')+'</div>';
+    var zoom = v.image
+      ? '<span class="vp-zoom">'+LB_ZOOM+'</span>'
+      : '';
     html +=
       '<div class="vp-card'+(v.id===selectedVehicleId?' selected':'')+(v.available?'':' disabled')+'" '+
         (v.available?'onclick="pickVehicle('+v.id+')"':'')+'>'+
-        '<img src="'+esc(v.image||fb)+'" alt="" onerror="this.onerror=null;this.src=\''+fb+'\'">'+
+        '<div class="vp-thumb" onclick="event.stopPropagation();showVehPreview('+v.id+')" title="Agrandir la photo">'+
+          '<img src="'+esc(v.image||fb)+'" alt="" onerror="this.onerror=null;this.src=\''+fb+'\'">'+zoom+
+        '</div>'+
         '<div class="vp-name">'+esc(v.name)+badge+'</div>'+
         '<div class="vp-price">' + v.price_2h + ' $ <small>/ 2 h · ' + v.price_day + ' $/jour</small></div>' +
         '<div class="vp-cap">'+ic('scale')+' '+v.capacity_kg+' kg · '+ic('fuel')+' même carburant</div>'+

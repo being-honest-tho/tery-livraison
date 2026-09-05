@@ -170,6 +170,7 @@
     section{padding:60px 16px}
     .sec-head h2{font-size:26px}
     .veh-grid{grid-template-columns:1fr}
+    .veh-art img{height:215px}
     .foot-inner{grid-template-columns:1fr;gap:26px}
     .foot-phone{font-size:19px}
   }
@@ -373,8 +374,18 @@
 <!-- ================= WIDGETS ================= -->
 {% include '_widgets.html' %}
 
+<!-- ================= LIGHTBOX APERÇU PHOTOS ================= -->
+{% include '_lightbox.html' %}
+
 <script>
 var IS_LOGGED = {{ 'true' if current_user else 'false' }};
+var parcList = [];
+
+function showVehPreview(i){
+  var v = parcList[i];
+  if(!v || !v.image) return;
+  openLightbox([v.image], v.name);
+}
 
 function vehImg(v){
   var fb = v.type === 'camion' ? '/static/truck.svg' : '/static/van.svg';
@@ -387,6 +398,7 @@ function loadParc(){
     .then(function(r){ return r.json(); })
     .then(function(data){
       var grid = document.getElementById('vehGrid');
+      parcList = data.vehicles;
       var avail = data.vehicles.filter(function(v){ return v.available; }).length;
       var total = data.vehicles.length;
       var sum = document.getElementById('availSummary');
@@ -396,7 +408,7 @@ function loadParc(){
         sum.innerHTML = '<span class="as-dot"></span> ' + avail + ' véhicule' + (avail > 1 ? 's' : '') + ' disponible' + (avail > 1 ? 's' : '') + ' sur ' + total + ' aujourd\'hui';
       }
       var html = '';
-      data.vehicles.forEach(function(v){
+      data.vehicles.forEach(function(v, i){
         var badge = v.available
           ? '<span class="veh-badge ok">● Disponible</span>'
           : '<span class="veh-badge no">● Occupé</span>';
@@ -406,9 +418,12 @@ function loadParc(){
         var btn = v.available
           ? '<button class="veh-btn" onclick="goReserve()">Réserver ce véhicule</button>'
           : '<button class="veh-btn" disabled>Indisponible aujourd\'hui</button>';
+        var zoom = v.image
+          ? '<span class="veh-zoom">'+LB_ZOOM+'</span>'
+          : '';
         html +=
           '<div class="veh-card">'+
-            '<div class="veh-art">'+vehImg(v)+'</div>'+
+            '<div class="veh-art" onclick="showVehPreview('+i+')" title="Agrandir la photo">'+vehImg(v)+zoom+'</div>'+
             '<div class="veh-body">'+
               '<div class="veh-top"><div class="veh-name">'+esc(v.name)+'</div>'+badge+'</div>'+
               '<div class="veh-type">'+esc(v.type)+'</div>'+

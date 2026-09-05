@@ -388,7 +388,7 @@ def login():
         phone = (request.form.get("phone") or "").strip()
         email = (request.form.get("email") or "").strip().lower()
         if not full_name or not phone:
-            error = "Votre nom et votre numéro de téléphone sont obligatoires."
+            error = "Votre prénom et votre numéro de téléphone sont obligatoires."
         else:
             db = get_db()
             user = db.execute("SELECT * FROM users WHERE phone = ?", (phone,)).fetchone()
@@ -681,17 +681,17 @@ def build_system_prompt():
         "  1. Le véhicule : choisir un camion/fourgonnette disponible, la date de début, la date de fin et la durée "
         "(2 heures = UNE SEULE journée, date de fin verrouillée ; journée complète = plusieurs jours possibles), "
         "puis la date et l'heure de récupération du véhicule.\n"
-        "  2. Identité & permis : nom complet, téléphone, email (optionnel) et numéro de permis de conduire.\n"
+        "  2. Identité & permis : prénom, téléphone, email (optionnel) et numéro de permis de conduire.\n"
         "  3. Le colis (chargement) : type (meubles, électros, autre), précision si « autre », et poids en kg "
         "(ne doit pas dépasser la capacité du véhicule).\n"
         "  4. Livraison & distance : adresse de départ (où le client est) et destination. La distance se calcule "
         "automatiquement (GPS).\n"
         "  5. Chauffeur ou main d'œuvre : le client peut venir chercher le véhicule lui-même ou cocher l'option "
-        "chauffeur/main d'œuvre (prix à discuter par téléphone au {phone}).\n"
+        "chauffeur/main d'œuvre (prix à discuter par téléphone au {phone} ou au {phone2}).\n"
         "  6. Paiement : la méthode de paiement : carte de crédit, virement bancaire ou espèces (paiement sur place). Il faut aussi "
         "accepter les 2 conditions : rendre le véhicule avec le même niveau de carburant qu'au départ, et être "
         "responsable des réparations en cas d'accident.\n"
-        "- Pour accéder au formulaire, le client entre son nom et son numéro de téléphone sur la page de connexion "
+        "- Pour accéder au formulaire, le client entre son prénom et son numéro de téléphone sur la page de connexion "
         "(email optionnel) — pas de mot de passe.\n"
         "- RÉSERVATION PAR TÉLÉPHONE : si le client veut réserver par téléphone, réponds-lui textuellement : "
         "« Passez votre réservation par téléphone : appelez le {phone} ou le {phone2}. Notre équipe prend votre réservation et vous "

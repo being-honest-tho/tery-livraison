@@ -73,8 +73,8 @@
     </div>
     <form method="post" action="/login{% if request.args.get('next') %}?next={{ request.args.get('next')|urlencode }}{% endif %}" novalidate>
       <div class="field">
-        <label for="full_name">Votre nom <span class="req">*</span></label>
-        <input type="text" id="full_name" name="full_name" placeholder="Ex : Jean Tremblay" required autofocus>
+        <label for="full_name">Votre prénom <span class="req">*</span></label>
+        <input type="text" id="full_name" name="full_name" placeholder="Ex : Jean" required autofocus>
       </div>
       <div class="field">
         <label for="phone">Numéro de téléphone <span class="req">*</span></label>
